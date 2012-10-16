@@ -1,0 +1,508 @@
+<?xml version="1.0"?>
+<!--
+ 
+ Copyright 2012 SAP AG
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+      http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+<project name="nwclouddeploy" basedir="." default="usage">
+
+    <!-- ============================================================ -->
+    <!-- Property definitions and initialization task -->
+    <!-- ============================================================ -->
+
+	<!-- Read properties from properties file -->
+	<property file="nwcloud.properties"/>
+
+	<target name="init">
+
+		<!-- Copy all environment variables to according project properties with prefix "env." -->
+		<property environment="env"/>
+
+		<!-- Set arguments for basedir and logging of deployment tool -->
+		<property name="sdk.args" value="-Dneo.logging.location=&quot;${sdk.dir}/tools/log&quot; -Dneo.base.location=&quot;${sdk.dir}/tools/.&quot;" />
+
+		<!-- Define default directories for local server and check if local server already exists -->
+		<property name="nwl.dir" value="${sdk.dir}/server" />
+		<property name="nwl.pickup" value="${nwl.dir}/pickup" />
+		<property name="nwl.webapps" value="${nwl.dir}/webapps" />
+		<property name="nwl.work" value="${nwl.dir}/work" />
+		<condition property="local.server.exists">
+			<available file="${nwl.dir}" type="dir"/>
+		</condition>
+
+		<!-- Define default directories for project -->
+		<property name="war.dir" value="target" />
+
+		<!-- Use JavaScript to compute some properties -->
+		<script language="javascript"><![CDATA[
+
+			// Define trim() function for Strings, if not already defined
+			if (!String.trim) {
+				String.prototype.trim = function () {
+					return this.replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, "");
+				};
+			}
+
+			// If proxy settings are not defined in properties file, then try to fetch from environment variables
+			if (project.getProperty("sdk.proxy")==null) {
+				var proxyargs = "";
+
+				// The Windows way...
+				if (project.getProperty("env.HTTP_PROXY_HOST")       !=null) proxyargs += " -Dhttp.proxyHost="      + project.getProperty("env.HTTP_PROXY_HOST");
+				if (project.getProperty("env.HTTP_PROXY_PORT")       !=null) proxyargs += " -Dhttp.proxyPort="      + project.getProperty("env.HTTP_PROXY_PORT");
+				if (project.getProperty("env.HTTPS_PROXY_HOST")      !=null) proxyargs += " -Dhttps.proxyHost="     + project.getProperty("env.HTTPS_PROXY_HOST");
+				if (project.getProperty("env.HTTPS_PROXY_PORT")      !=null) proxyargs += " -Dhttps.proxyPort="     + project.getProperty("env.HTTPS_PROXY_PORT");
+				if (project.getProperty("env.HTTP_NON_PROXY_HOSTS")  !=null) proxyargs += " -Dhttp.nonProxyHosts="  + project.getProperty("env.HTTP_NON_PROXY_HOSTS");
+				if (project.getProperty("env.HTTPS_NON_PROXY_HOSTS") !=null) proxyargs += " -Dhttps.nonProxyHosts=" + project.getProperty("env.HTTPS_NON_PROXY_HOSTS");
+
+				// The Unix way...
+				var envvar = null;
+				if (project.getProperty("env.HTTP_PROXY") !=null) envvar=project.getProperty("env.HTTP_PROXY");
+				if (project.getProperty("env.http_proxy") !=null) envvar=project.getProperty("env.http_proxy");
+				if (envvar !=null) {
+					try {
+						var parts = envvar.match(/(.*):\/\/(.*):(.*)/);
+						proxyargs += " -Dhttp.proxyHost=" + parts[2];
+						proxyargs += " -Dhttp.proxyPort=" + parts[3];
+					} catch(err) { }
+				}
+				envvar = null;
+				if (project.getProperty("env.HTTPS_PROXY") !=null) envvar=project.getProperty("env.HTTPS_PROXY");
+				if (project.getProperty("env.https_proxy") !=null) envvar=project.getProperty("env.https_proxy");
+				if (envvar !=null) {
+					try {
+						var parts = envvar.match(/(.*):\/\/(.*):(.*)/);
+						proxyargs += " -Dhttps.proxyHost=" + parts[2];
+						proxyargs += " -Dhttps.proxyPort=" + parts[3];
+					} catch(err) { }
+				}
+				envvar = null;
+				if (project.getProperty("env.NO_PROXY") !=null) envvar=project.getProperty("env.NO_PROXY");
+				if (project.getProperty("env.no_proxy") !=null) envvar=project.getProperty("env.no_proxy");
+				if (envvar !=null) {
+					try {
+						var delimited = (new String(envvar)).replace(/(\s*),(\s*)/g, "|");
+						proxyargs += " -Dhttp.nonProxyHosts=\""  + delimited + "\"";
+						proxyargs += " -Dhttps.nonProxyHosts=\"" + delimited  + "\"";
+					} catch(err) { }
+				}
+
+				project.setProperty("sdk.proxy.set", proxyargs.trim());
+			} else {
+				project.setProperty("sdk.proxy.set", project.getProperty("sdk.proxy"));
+			}
+
+			// Did the user provide a password in the properties file?
+			if (project.getProperty("password")==null) {
+				project.setProperty("password.show", "not specified");
+			} else {
+				project.setProperty("password.set", project.getProperty("password"));
+				project.setProperty("password.show", "specified, but not shown");
+			}
+
+			// Setting project.name to maven.project.name if it has been
+			// passed by Maven. If not, set it to war.name from nwcloud.properties
+			mavenprojectname = project.getProperty("maven.project.name");
+			warname = project.getProperty("war.name");
+			if (mavenprojectname==null) {
+				project.setProperty("project.name",warname);
+			} else {
+				project.setProperty("project.name",mavenprojectname);
+			}
+
+			// Setting project.version to maven.project.version if it has been
+			// passed by Maven. If not, set it to an empty string.
+			mavenprojectversion = project.getProperty("maven.project.version");
+			if (mavenprojectname==null) {
+				project.setProperty("project.version","");
+			} else {
+				project.setProperty("project.version",mavenprojectversion);
+			}
+
+			// Set url.arg to hold the optional URL argument if url is set in nwcloud.properties
+			if (project.getProperty("url")==null) {
+				project.setProperty("url.arg", "");
+			} else {
+				project.setProperty("url.arg", " -url " + project.getProperty("url"));
+			}
+
+			// Set component.arg to hold the optional component argument if component is set in nwcloud.properties
+			if (project.getProperty("component")==null) {
+				project.setProperty("component.arg", "");
+			} else {
+				project.setProperty("component.arg", " -component " + project.getProperty("component"));
+			}
+
+			// Set severity.arg to hold the optional severity argument if severity is set in nwcloud.properties
+			if (project.getProperty("severity")==null) {
+				project.setProperty("severity.arg", "");
+			} else {
+				project.setProperty("severity.arg", " --severity " + project.getProperty("severity"));
+			}
+
+			// Set minimum-processes.arg to hold the optional minimum-processes argument if minimum-processes is set in nwcloud.properties
+			if (project.getProperty("minimum-processes")==null) {
+				project.setProperty("minimum-processes.arg", "");
+			} else {
+				project.setProperty("minimum-processes.arg", " --minimum-processes " + project.getProperty("minimum-processes"));
+			}
+
+			// Set maximum-processes.arg to hold the optional maximum-processes argument if maximum-processes is set in nwcloud.properties
+			if (project.getProperty("maximum-processes")==null) {
+				project.setProperty("maximum-processes.arg", "");
+			} else {
+				project.setProperty("maximum-processes.arg", " --maximum-processes " + project.getProperty("maximum-processes"));
+			}
+
+			// Set synchronous.arg to hold the optional synchronous argument if synchronous is set in nwcloud.properties
+			if (project.getProperty("synchronous")==null) {
+				project.setProperty("synchronous.arg", "");
+			} else {
+				if (project.getProperty("synchronous").toLowerCase()=="true") {
+					project.setProperty("synchronous.arg", " --synchronous");
+				} else {
+					project.setProperty("synchronous.arg", "");
+				}
+			}
+
+			// Set source.set to either source from nwcloud.properties or compute from war dir, project name and version if not set
+			if (project.getProperty("source")==null) {
+				wardir=project.getProperty("war.dir");
+				projectversion=project.getProperty("project.version");
+				if (projectversion.length()==0) {
+					project.setProperty("source.set",wardir+"/"+project.getProperty("project.name")+".war");
+				} else {
+					project.setProperty("source.set",wardir+"/"+project.getProperty("project.name")+"-"+projectversion+".war");
+				}
+			} else {
+				project.setProperty("source.set",project.getProperty("source"));
+			}
+
+			// Set application.set to application if it is set in nwcloud.properties. Otherwise use project name in lowercase.
+			if (project.getProperty("application")==null) {
+				project.setProperty("application.set", project.getProperty("project.name").toLowerCase());
+			} else {
+				project.setProperty("application.set", project.getProperty("application"));
+			}
+
+		]]> </script>
+
+
+	</target>
+
+    <!-- ============================================================ -->
+    <!-- Password: Query password if not given in properties file.    -->
+    <!-- ============================================================ -->
+
+	<target name="password">
+
+		<!-- Use JavaScript to query password if not already given in "password". -->
+		<script language="javascript"><![CDATA[
+
+			if (project.getProperty("password")==null) {
+				var syscon = java.lang.System.console();
+				syscon.writer().println("No password for SAP NetWeaver Cloud user specified in \"nwcloud.properties\" file.")
+				syscon.writer().print("Please enter password: ")
+				syscon.writer().flush();
+				var passwd = new java.lang.String(syscon.readPassword());
+				project.setProperty("password.set", passwd);
+			}
+
+		]]> </script>
+
+	</target>
+
+
+    <!-- ============================================================ -->
+    <!-- Usage: Show available targets and used settings (propeties)  -->
+    <!-- ============================================================ -->
+
+	<target name="usage" depends="init">
+		<echo message=""/>
+		<echo message="Ant build file for SAP NetWeaver Cloud deployment"/>
+		<echo message="================================================="/>
+		<echo message=""/>
+		<echo message="Available targets"/>
+		<echo message="-----------------"/>
+		<echo message=""/>
+		<echo message="deploy        ->  Deploy WAR as app to NW Cloud"/>
+		<echo message="start         ->  Start app instance on NW Cloud"/>
+		<echo message="stop          ->  Stop app instance on NW Cloud"/>
+		<echo message="undeploy      ->  Undeploy app from NW Cloud"/>
+		<echo message="status        ->  Show status of app on NW Cloud"/>
+		<echo message="apps          ->  Show apps deployed on NW Cloud account"/>
+		<echo message="comps         ->  Show components of deployed app on NW Cloud"/>
+		<echo message=""/>
+		<echo message="deploy-local  ->  Deploy WAR to local NW Cloud server"/>
+		<echo message="start-local   ->  Start local NW Cloud server"/>
+		<echo message="stop-local    ->  Stop local NW Cloud server"/>
+		<echo message="clean-local   ->  Delete WAR from local NW Cloud server"/>
+		<echo message=""/>
+		<echo message="Settings available in Ant"/>
+		<echo message="-------------------------"/>
+		<echo message=""/>
+		<echo message="basedir               = ${basedir}"/>
+		<echo message=""/>
+		<echo message="Settings passed by Maven"/>
+		<echo message="------------------------"/>
+		<echo message=""/>
+		<echo message="maven.project.name    = ${maven.project.name}"/>
+		<echo message="maven.project.version = ${maven.project.version}"/>
+		<echo message=""/>
+		<echo message="Settings from nwcloud.properties"/>
+		<echo message="--------------------------------"/>
+		<echo message=""/>
+		<echo message="war.name              = ${war.name}"/>
+		<echo message="source                = ${source}"/>
+		<echo message="sdk.dir               = ${sdk.dir}"/>
+		<echo message="sdk.proxy             = ${sdk.proxy}"/>
+		<echo message="host                  = ${host}"/>
+		<echo message="account               = ${account}"/>
+		<echo message="application           = ${application}"/>
+		<echo message="component             = ${component}"/>
+		<echo message="url                   = ${url}"/>
+		<echo message="user                  = ${user}"/>
+		<echo message="password              = ${password.show}"/>
+		<echo message=""/>
+		<echo message="Settings derived"/>
+		<echo message="----------------"/>
+		<echo message=""/>
+		<echo message="project.name          = ${project.name}"/>
+		<echo message="project.version       = ${project.version}"/>
+		<echo message="war.dir               = ${war.dir}"/>
+		<echo message="source.set            = ${source.set}"/>
+		<echo message="sdk.args              = ${sdk.args}"/>
+		<echo message="sdk.proxy.set         = ${sdk.proxy.set}"/>
+		<echo message="application.set       = ${application.set}"/>
+		<echo message="url.arg               = ${url.arg}"/>
+		<echo message="component.arg         = ${component.arg}"/>
+		<echo message="severity.arg          = ${severity.arg}"/>
+		<echo message="minimum-processes.arg = ${minimum-processes.arg}"/>
+		<echo message="maximum-processes.arg = ${maximum-processes.arg}"/>
+		<echo message="synchronous.arg       = ${synchronous.arg}"/>
+		<echo message="local.server.exists   = ${local.server.exists}"/>
+		<echo message="nwl.dir               = ${nwl.dir}"/>
+		<echo message="nwl.pickup            = ${nwl.pickup}"/>
+		<echo message="nwl.webapps           = ${nwl.webapps}"/>
+		<echo message="nwl.work              = ${nwl.work}"/>
+		<echo message=""/>
+	</target>
+
+    <!-- ============================================================ -->
+    <!-- hint: Target to show hint on what to do after packaging      -->
+    <!-- ============================================================ -->
+
+	<target name="hint" depends="init">
+		<echo message=""/>
+		<echo message="WAR file created"/>
+		<echo message="================"/>
+		<echo message=""/>
+		<echo message="Your application has been packaged to a WAR file:"/>
+		<pathconvert targetos="unix" property="source.unix">
+			<path>
+				<pathelement location="${source.set}"/>
+			</path>
+		</pathconvert>
+		<echo message="${source.unix}"/>
+		<echo message=""/>
+		<echo message="What to do now?"/>
+		<echo message="---------------"/>
+		<echo message=""/>
+		<echo message="You could use the NWCloud-Maven-Plugin now to deploy your"/>
+		<echo message="app to SAP NetWeaver Cloud, or test it on a local instance."/>
+		<echo message=""/>
+		<echo message="To use the NWCloud-Maven-Plugin, type"/>
+		<echo message=""/>
+		<echo message="mvn nwcloud:&lt;goal&gt;"/>
+		<echo message=""/>
+		<echo message="where &lt;goal&gt; is one of the following actions:"/>
+		<echo message=""/>
+		<echo message="deploy        ->  Deploy WAR as app to NW Cloud"/>
+		<echo message="start         ->  Start app instance on NW Cloud"/>
+		<echo message="stop          ->  Stop app instance on NW Cloud"/>
+		<echo message="undeploy      ->  Undeploy app from NW Cloud"/>
+		<echo message="status        ->  Show status of app on NW Cloud"/>
+		<echo message="apps          ->  Show apps deployed on NW Cloud account"/>
+		<echo message="comps         ->  Show components of deployed app on NW Cloud"/>
+		<echo message=""/>
+		<echo message="deploy-local  ->  Deploy WAR to local NW Cloud server"/>
+		<echo message="start-local   ->  Start local NW Cloud server"/>
+		<echo message="stop-local    ->  Stop local NW Cloud server"/>
+		<echo message="clean-local   ->  Delete WAR from local NW Cloud server"/>
+		<echo message=""/>
+		<echo message="usage         ->  Show usage info and currently used settings"/>
+		<echo message=""/>
+	</target>
+
+    <!-- ============================================================ -->
+    <!-- NW Cloud -->
+    <!-- ============================================================ -->
+
+	<target name="deploy" description="Deploy WAR as app to NW Cloud" depends="init,password">
+		<!-- Copy WAR file to a name without version before deploying it (NW Cloud might derive web context from WAR name) -->
+		<copy file="${source.set}" tofile="${war.dir}/${project.name}.war" preservelastmodified="true"/>
+		<pathconvert targetos="unix" property="source.unix">
+			<path>
+				<pathelement location="${war.dir}/${project.name}.war"/>
+			</path>
+		</pathconvert>
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
+			<arg line="deploy --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set} --source &quot;${source.unix}&quot;${url.arg}${component.arg}${severity.arg}${minimum-processes.arg}${maximum-processes.arg}"/>
+		</java>
+	</target>
+
+	<target name="start" description="Start app instance on NW Cloud" depends="init,password">
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
+			<arg line="start --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set}${component.arg}${synchronous.arg}"/>
+		</java>
+	</target>
+
+	<target name="stop" description="Stop app instance on NW Cloud" depends="init,password">
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
+			<arg line="stop --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set}${component.arg}${synchronous.arg}"/>
+		</java>
+	</target>
+
+	<target name="undeploy" description="Undeploy app from NW Cloud" depends="init,password">
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
+			<arg line="undeploy --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set}${component.arg}"/>
+		</java>
+	</target>
+
+	<target name="status" description="Show status of app on NW Cloud" depends="init,password">
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
+			<arg line="status --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set}"/>
+		</java>
+	</target>
+
+	<target name="apps" description="Show apps deployed on NW Cloud account" depends="init,password">
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
+			<arg line="list-applications --host ${host} --account ${account} --user ${user} --password ${password.set}"/>
+		</java>
+	</target>
+
+	<target name="comps" description="Show components of deployed app on NW Cloud" depends="init,password">
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
+			<arg line="list-components --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set}"/>
+		</java>
+	</target>
+
+    <!-- ============================================================ -->
+    <!-- Local NW Cloud -->
+    <!-- ============================================================ -->
+
+	<target name="check-local-server" depends="init" unless="local.server.exists">
+		<echo>Creating local NW Cloud server..."</echo>
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args}"/>
+			<arg line="install-local"/>
+		</java>
+	</target>
+
+	<target name="deploy-local" description="Deploy WAR to local NW Cloud server" depends="init,check-local-server">
+		<!-- Copy WAR file to a name without version before deploying it (server might derive web context from WAR name) -->
+		<copy file="${source.set}" tofile="${war.dir}/${project.name}.war" preservelastmodified="true"/>
+		<copy todir="${nwl.pickup}" preservelastmodified="true">
+			<fileset dir="${war.dir}">
+				<include name="${project.name}.war"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="start-local" description="Start local NW Cloud server" depends="init,check-local-server">
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args}"/>
+			<arg line="start-local"/>
+		</java>
+	</target>
+
+	<target name="stop-local" description="Stop local NW Cloud server" depends="init,check-local-server">
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args}"/>
+			<arg line="stop-local"/>
+		</java>
+	</target>
+
+	<target name="clean-local" description="Delete WAR from local NW Cloud server" depends="init">
+		<delete failonerror="false">
+			<fileset dir="${nwl.pickup}">
+				<include name="${project.name}.war"/>
+			</fileset>
+			<fileset dir="${nwl.pickup}/.state">
+				<include name="${project.name}.*"/>
+			</fileset>
+		</delete>
+		<delete dir="${nwl.webapps}/${project.name}" failonerror="false"/>
+		<delete dir="${nwl.work}/Catalina" failonerror="false"/>
+	</target>
+
+</project>
