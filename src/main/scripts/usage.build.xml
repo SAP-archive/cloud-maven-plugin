@@ -365,7 +365,7 @@
 				</fileset>
 			</classpath>
 			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
-			<arg line="deploy --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set} --source &quot;${source.unix}&quot;${url.arg}${component.arg}${severity.arg}${minimum-processes.arg}${maximum-processes.arg}"/>
+			<arg line="deploy --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set} --source &quot;${source.unix}&quot;${url.arg}${component.arg}${severity.arg}${minimum-processes.arg}${maximum-processes.arg} --java-version 7"/>
 		</java>
 	</target>
 
