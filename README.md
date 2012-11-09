@@ -260,9 +260,9 @@ It is important that you adjust the file `nwcloud.properties` according to your 
 - the desired target of deployment, and
 - the location of the SAP NetWeaver Cloud SDK.
 
-> **SCN user and 90-day-trial**
+> **SCN user and free SAP NetWeaver Cloud account**
 >
-> If you do not have access to SAP NetWeaver Cloud yet, please register a user at [SAP Community Network (SCN)](http://scn.sap.com/) and follow the steps explained [here](http://scn.sap.com/docs/DOC-28197) to get a free 90-day-trial.
+> If you do not have access to SAP NetWeaver Cloud yet, please register a user at [SAP Community Network (SCN)](http://scn.sap.com/) and follow the steps explained [here](http://scn.sap.com/docs/DOC-28197) to get a free developer account.
 
 Now use the text editor of your choice to open `nwcloud.properties`, and set your SCN user (password is optional) in the following lines:
 
@@ -290,7 +290,7 @@ Define where to deploy the web application by adjusting the following lines:
 	account=myaccount
 	#application=myapp
 
-> **Hint**: If you are using the SAP NetWeaver Cloud 90-day-trial then the host is `https://nwtrial.ondemand.com`
+> **Hint**: If you are using the free SAP NetWeaver Cloud developer account then the host is `https://nwtrial.ondemand.com`
 
 Finally make sure that the following line is pointing to the directory where you have installed the [SAP NetWeaver Cloud SDK](https://tools.netweaver.ondemand.com/) (Neo SDK).
 
