@@ -68,4 +68,26 @@
       </plugin>
     </plugins>
   </build>
+
+    <!-- cf. http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/  -->
+  <scm>
+    <connection>scm:git:git@github.com:cthiebaud/abendrot.git</connection>
+    <url>scm:git:git@github.com:cthiebaud/abendrot.git</url>
+    <developerConnection>scm:git:git@github.com:cthiebaud/abendrot.git</developerConnection>
+  </scm>
+
+  <distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>beh_releases</id>
+      <url>http://buildeventhub.net:8081/nexus/content/repositories/releases/</url>
+      <layout>default</layout>
+    </repository>
+    <snapshotRepository>
+      <uniqueVersion>true</uniqueVersion>
+      <id>beh_snapshots</id>
+      <url>http://buildeventhub.net:8081/nexus/content/repositories/snapshots/</url>
+            <layout>default</layout>
+    </snapshotRepository>
+  </distributionManagement>
 </project>
