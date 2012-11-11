@@ -23,7 +23,7 @@
     <!-- ============================================================ -->
 
 	<!-- Read properties from properties file -->
-	<property file="nwcloud.properties"/>
+	<property file="${user.home}/.nwcloud/nwcloud.properties"/>
 
 	<target name="init">
 
