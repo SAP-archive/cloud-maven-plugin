@@ -69,11 +69,11 @@
     </plugins>
   </build>
 
-    <!-- cf. http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/  -->
+  <!-- cf. http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/  -->
   <scm>
-    <connection>scm:git:git@github.com:cthiebaud/abendrot.git</connection>
-    <url>scm:git:git@github.com:cthiebaud/abendrot.git</url>
-    <developerConnection>scm:git:git@github.com:cthiebaud/abendrot.git</developerConnection>
+    <connection>scm:git:git@github.com:cthiebaud/nwcloud-maven-plugin.git</connection>
+    <url>scm:git:git@github.com:cthiebaud/nwcloud-maven-plugin.git</url>
+    <developerConnection>scm:git:git@github.com:cthiebaud/nwcloud-maven-plugin.git</developerConnection>
   </scm>
 
   <distributionManagement>
@@ -87,7 +87,7 @@
       <uniqueVersion>true</uniqueVersion>
       <id>beh_snapshots</id>
       <url>http://buildeventhub.net:8081/nexus/content/repositories/snapshots/</url>
-            <layout>default</layout>
+      <layout>default</layout>
     </snapshotRepository>
   </distributionManagement>
 </project>
