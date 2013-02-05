@@ -73,7 +73,7 @@ In `settings.xml` search for the `pluginGroups` tag and insert `com.sap.research
 
 ### Using the plugin ###
 
-The easies way to use the plugin with your Maven managed web application is to include the plugin to the build plugins of the project. To do this, open the project file `pom.xml` and insert the following lines at the end of the build plugins section:
+The easiest way to use the plugin with your Maven managed web application is to include the plugin to the build plugins of the project. To do this, open the project file `pom.xml` and insert the following lines at the end of the build plugins section:
 
 	<build>
 		<plugins>
@@ -81,7 +81,7 @@ The easies way to use the plugin with your Maven managed web application is to i
             <plugin>
                 <groupId>com.sap.research</groupId>
                 <artifactId>nwcloud-maven-plugin</artifactId>
-				<version>1.0.0.RELEASE</version>
+				<version>1.0.1.RELEASE</version>
 				<executions>
 					<execution>
 						<id>after.package</id>
@@ -191,7 +191,7 @@ Template for nwcloud.properties file
 	sdk.dir=c:\\Program Files\\Neo-SDK
 
 	# Proxy settings for Java Virtual Machine
-	# - Proxy settings are tried to be autodetected from environment variables.
+	# - Proxy settings are tried to be autodetected from environment variables and Maven settings.
 	# - If you are behind a proxy and autodetect does not work or you need to override the settings, this can be done here.
 	#sdk.proxy=-Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy -Dhttps.proxyPort=8080 -Dhttp.nonProxyHosts="localhost|127.0.0.1" -Dhttps.nonProxyHosts="localhost|127.0.0.1" -Dhttp.proxyUser=proxyuser -Dhttp.proxyPassword=proxypassword -Dhttps.proxyUser=proxyuser -Dhttps.proxyPassword=proxypassword
 
@@ -211,7 +211,7 @@ Template for nwcloud.properties file
 	# SCN user (and password)
 	# -----------------------------------------------------------------------------
 	#  - user: SCN user (as registered at http://scn.sap.com/)
-	#  - password: Password of SCN user. If not specified, it will be queried on the commandline each time needed.
+	#  - password: Password of SCN user. If not specified here or (encrypted) in Maven settings, it will be queried on the commandline each time needed.
 	user=myscnuser
 	#password=myscnpassword
 
@@ -224,6 +224,9 @@ Template for nwcloud.properties file
 
 	# Define specific component name for deployed application (optional, defaults to "web").
 	#component=myappcomp
+
+	# Request specific Java runtime version for execution of deployed components (optional, defaults to Java 6).
+	#java-version=7
 
 	# The logging level of the server process(es) (optional, defaults to "error").
 	# Allowed values are: error|warn|info|debug
@@ -270,8 +273,8 @@ Now use the text editor of your choice to open `nwcloud.properties`, and set you
 	# SCN user (and password)
 	# -----------------------------------------------------------------------------
 	#  - user: SCN user (as registered at http://scn.sap.com/)
-	#  - password: Password of SCN user. If not specified, it will be queried on
-	#              the commandline each time needed.
+	#  - password: Password of SCN user. If not specified here or (encrypted) in
+	#              Maven settings, it will be queried on the commandline each time needed.
 	user=myscnuser
 	#password=myscnpassword
 
@@ -302,3 +305,63 @@ Finally make sure that the following line is pointing to the directory where you
 	#     - Windows users: Please use double backslash instead of single backslash (e.g. c:\\Program Files\\Neo-SDK)
 	#     - Linux/Mac users: Just use normal slash as usual (e.g. /home/myuser/bin/neo-sdk)
 	sdk.dir=c:\\Program Files\\Neo-SDK
+
+
+Using encrypted passwords
+-------------------------
+
+Instead of storing the password of your SCN user as plain text in `nwcloud.properties` or to type the password to the console each time it is needed, a new feature to use encrypted password storage in Maven’s configuration file was added in version 1.0.1.RELEASE of the plugin.
+
+As a first step to use this feature, add a server with your encrypted SCN user password to Maven’s configuration file `settings.xml` as described here:
+
+[http://maven.apache.org/guides/mini/guide-encryption.html](http://maven.apache.org/guides/mini/guide-encryption.html)
+
+This server will represent a SAP NetWeaver Cloud landscape we want to deploy to. To be able to identify the correct server definition (and according SCN user's password) later on, we further describe the server using a `configuration` tag, with one, two or three of the following sub tags:
+- `host`
+- `account`
+- `user`
+
+A server definition could look like this:
+
+	<servers>
+		[...]
+		<server>
+			<id>nwcloud-01</id>
+			<password>{COQLCE6DU6GtcS5P=}</password>
+			<configuration>
+				<host>https://nwtrial.ondemand.com</host>
+				<account>myaccount</account>
+				<user>myuser</user>
+			</configuration>
+		</server>
+		[...]
+	</servers>
+
+Now, whenever the nwcloud-maven-plugin needs a password, it will try to get the password in the following order:
+
+1. Read clear text password from `nwcloud.properties`.
+2. If not found in step 1, try to read password from a matching server in Maven’s `settings.xml`.
+3. If not found in step 1 and 2, query user for password on console.
+
+To find the best matching server in Maven’s `settings.xml`, the plugin will go through the list of all defined servers that have a password and a configuration defined. For each of these servers the plugin will compare the attributes `host`, `account`, and `user` to the ones defined in `nwcloud.properties`. The server with the most matching attributes "wins" and its (decrypted) password will be used as your SCN user password when performing operations.
+
+> **Hint**: This allows you to e.g. define a server that has just the attribute `user` defined, and thus will match all requests for passwords for this user as long as there is no more specific server (with more matching attributes) defined.
+
+For testing purposes you can use the following command to see which server is matched by the plugin for certain values of `host`, `account`, or `user` (at least one parameter needs to be defined):
+
+	mvn nwcloud:getpwd -Dhost=abc -Daccount=def -Duser=ghi
+
+Please be aware that in this case of manual testing (and ONLY in this case) the matched server as well as its decrypted password will be printed to the console in clear text.
+
+
+Version history
+---------------
+
+**1.0.1.RELEASE**
+- Added support for parameter `java-version` in `nwcloud.properties`.
+- Added support for encrypted password storage in Maven’s `settings.xml` (see section "Using encrypted passwords" in this document for details).
+- Improved autodetection of proxy settings by taking Maven settings into account.
+
+**1.0.0.RELEASE**
+
+- Initial release

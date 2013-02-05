@@ -23,198 +23,68 @@
       <goal>usage</goal>
       <call>usage</call>
       <description>Show usage info and currently used settings</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <mojo>
       <goal>hint</goal>
       <call>hint</call>
       <description>Show hint on what to do after packaging</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <!-- NW Cloud goals -->
     <mojo>
       <goal>deploy</goal>
       <call>deploy</call>
       <description>Deploy WAR as app to NW Cloud</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <mojo>
       <goal>start</goal>
       <call>start</call>
       <description>Start app instance on NW Cloud</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <mojo>
       <goal>stop</goal>
       <call>stop</call>
       <description>Stop app instance on NW Cloud</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <mojo>
       <goal>undeploy</goal>
       <call>undeploy</call>
       <description>Undeploy app from NW Cloud</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <mojo>
       <goal>status</goal>
       <call>status</call>
       <description>Show status of app on NW Cloud</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <mojo>
       <goal>apps</goal>
       <call>apps</call>
       <description>Show apps deployed on NW Cloud account</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <mojo>
       <goal>comps</goal>
       <call>comps</call>
       <description>Show components of deployed app on NW Cloud</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <!-- Local NW Cloud goals -->
     <mojo>
       <goal>deploy-local</goal>
       <call>deploy-local</call>
       <description>Deploy WAR to local NW Cloud server</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <mojo>
       <goal>start-local</goal>
       <call>start-local</call>
       <description>Start local NW Cloud server</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <mojo>
       <goal>stop-local</goal>
       <call>stop-local</call>
       <description>Stop local NW Cloud server</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
     <mojo>
       <goal>clean-local</goal>
       <call>clean-local</call>
       <description>Delete WAR from local NW Cloud server</description>
-      <parameters>
-        <parameter>
-          <property>maven.project.name</property>
-          <expression>${project.name}</expression>
-        </parameter>
-        <parameter>
-          <property>maven.project.version</property>
-          <expression>${project.version}</expression>
-        </parameter>
-      </parameters>
     </mojo>
   </mojos>
 </pluginMetadata>

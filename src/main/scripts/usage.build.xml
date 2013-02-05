@@ -42,12 +42,12 @@
 			<available file="${nwl.dir}" type="dir"/>
 		</condition>
 
-		<!-- Define default directories for project -->
+		<!-- Define directory where to look for WAR file -->
 		<property name="war.dir" value="target" />
 
 		<!-- Use JavaScript to compute some properties -->
 		<script language="javascript"><![CDATA[
-
+			
 			// Define trim() function for Strings, if not already defined
 			if (!String.trim) {
 				String.prototype.trim = function () {
@@ -55,56 +55,83 @@
 				};
 			}
 
-			// If proxy settings are not defined in properties file, then try to fetch from environment variables
+			// If proxy settings are not defined in properties file, then try to fetch from environment variables or Maven settings
 			if (project.getProperty("sdk.proxy")==null) {
 				var proxyargs = "";
 
-				// The Windows way...
+				// Try to fetch from environment variables - the Windows way...
 				if (project.getProperty("env.HTTP_PROXY_HOST")       !=null) proxyargs += " -Dhttp.proxyHost="      + project.getProperty("env.HTTP_PROXY_HOST");
 				if (project.getProperty("env.HTTP_PROXY_PORT")       !=null) proxyargs += " -Dhttp.proxyPort="      + project.getProperty("env.HTTP_PROXY_PORT");
 				if (project.getProperty("env.HTTPS_PROXY_HOST")      !=null) proxyargs += " -Dhttps.proxyHost="     + project.getProperty("env.HTTPS_PROXY_HOST");
 				if (project.getProperty("env.HTTPS_PROXY_PORT")      !=null) proxyargs += " -Dhttps.proxyPort="     + project.getProperty("env.HTTPS_PROXY_PORT");
 				if (project.getProperty("env.HTTP_NON_PROXY_HOSTS")  !=null) proxyargs += " -Dhttp.nonProxyHosts="  + project.getProperty("env.HTTP_NON_PROXY_HOSTS");
 				if (project.getProperty("env.HTTPS_NON_PROXY_HOSTS") !=null) proxyargs += " -Dhttps.nonProxyHosts=" + project.getProperty("env.HTTPS_NON_PROXY_HOSTS");
+			
+			    // Try to fetch from environment variables - the Unix way...
+				if (proxyargs=="") {
+					var envvar = null;
+					if (project.getProperty("env.HTTP_PROXY") !=null) envvar=project.getProperty("env.HTTP_PROXY");
+					if (project.getProperty("env.http_proxy") !=null) envvar=project.getProperty("env.http_proxy");
+					if (envvar !=null) {
+						try {
+							var parts = envvar.match(/(.*):\/\/(.*):(.*)/);
+							proxyargs += " -Dhttp.proxyHost=" + parts[2];
+							proxyargs += " -Dhttp.proxyPort=" + parts[3];
+						} catch(err) { }
+					}
+					envvar = null;
+					if (project.getProperty("env.HTTPS_PROXY") !=null) envvar=project.getProperty("env.HTTPS_PROXY");
+					if (project.getProperty("env.https_proxy") !=null) envvar=project.getProperty("env.https_proxy");
+					if (envvar !=null) {
+						try {
+							var parts = envvar.match(/(.*):\/\/(.*):(.*)/);
+							proxyargs += " -Dhttps.proxyHost=" + parts[2];
+							proxyargs += " -Dhttps.proxyPort=" + parts[3];
+						} catch(err) { }
+					}
+					envvar = null;
+					if (project.getProperty("env.NO_PROXY") !=null) envvar=project.getProperty("env.NO_PROXY");
+					if (project.getProperty("env.no_proxy") !=null) envvar=project.getProperty("env.no_proxy");
+					if (envvar !=null) {
+						try {
+							var delimited = (new String(envvar)).replace(/(\s*),(\s*)/g, "|");
+							proxyargs += " -Dhttp.nonProxyHosts=\""  + delimited + "\"";
+							proxyargs += " -Dhttps.nonProxyHosts=\"" + delimited  + "\"";
+						} catch(err) { }
+					}
+				}
 
-				// The Unix way...
-				var envvar = null;
-				if (project.getProperty("env.HTTP_PROXY") !=null) envvar=project.getProperty("env.HTTP_PROXY");
-				if (project.getProperty("env.http_proxy") !=null) envvar=project.getProperty("env.http_proxy");
-				if (envvar !=null) {
+				// Try to fetch from Maven...
+				if (proxyargs=="") {
 					try {
-						var parts = envvar.match(/(.*):\/\/(.*):(.*)/);
-						proxyargs += " -Dhttp.proxyHost=" + parts[2];
-						proxyargs += " -Dhttp.proxyPort=" + parts[3];
+						// org.apache.maven.execution.MavenSession.getRequest() -> MavenExecutionRequest.getProxies() -> List<Proxy> 
+						var mavenProxies = this.session.getRequest().getProxies().toArray();
+						var mavenProxyIndex;
+		        		for (mavenProxyIndex in mavenProxies) {
+							var mavenProxy = mavenProxies[mavenProxyIndex];
+							if (mavenProxy.isActive()) {
+								// This might look weird, but Maven just uses the first active proxy in 'settings.xml' - either http or https.
+								// For convenience we set this one proxy for both protocols. If separate proxies are needed, then use environment
+								// variables or override proxy settings in 'nwcloud.properties'.
+								if ((mavenProxy.getProtocol().toLowerCase()=="http") || (mavenProxy.getProtocol().toLowerCase()=="https")) {								
+									if (mavenProxy.getHost()          !=null) proxyargs += " -Dhttp.proxyHost="        + mavenProxy.getHost();
+									if (mavenProxy.getPort()          !=null) proxyargs += " -Dhttp.proxyPort="        + mavenProxy.getPort();
+									if (mavenProxy.getNonProxyHosts() !=null) proxyargs += " -Dhttp.nonProxyHosts=\""  + mavenProxy.getNonProxyHosts() + "\"";
+									if (mavenProxy.getHost()          !=null) proxyargs += " -Dhttps.proxyHost="       + mavenProxy.getHost();
+									if (mavenProxy.getPort()          !=null) proxyargs += " -Dhttps.proxyPort="       + mavenProxy.getPort();
+									if (mavenProxy.getNonProxyHosts() !=null) proxyargs += " -Dhttps.nonProxyHosts=\"" + mavenProxy.getNonProxyHosts() + "\"";
+								}
+							}
+		        		}
 					} catch(err) { }
 				}
-				envvar = null;
-				if (project.getProperty("env.HTTPS_PROXY") !=null) envvar=project.getProperty("env.HTTPS_PROXY");
-				if (project.getProperty("env.https_proxy") !=null) envvar=project.getProperty("env.https_proxy");
-				if (envvar !=null) {
-					try {
-						var parts = envvar.match(/(.*):\/\/(.*):(.*)/);
-						proxyargs += " -Dhttps.proxyHost=" + parts[2];
-						proxyargs += " -Dhttps.proxyPort=" + parts[3];
-					} catch(err) { }
-				}
-				envvar = null;
-				if (project.getProperty("env.NO_PROXY") !=null) envvar=project.getProperty("env.NO_PROXY");
-				if (project.getProperty("env.no_proxy") !=null) envvar=project.getProperty("env.no_proxy");
-				if (envvar !=null) {
-					try {
-						var delimited = (new String(envvar)).replace(/(\s*),(\s*)/g, "|");
-						proxyargs += " -Dhttp.nonProxyHosts=\""  + delimited + "\"";
-						proxyargs += " -Dhttps.nonProxyHosts=\"" + delimited  + "\"";
-					} catch(err) { }
-				}
-
+		
 				project.setProperty("sdk.proxy.set", proxyargs.trim());
 			} else {
 				project.setProperty("sdk.proxy.set", project.getProperty("sdk.proxy"));
 			}
 
-			// Did the user provide a password in the properties file?
+			// Did the user provide a password in the properties file (or via parameter "-Dpassword=..." on commandline)?
 			if (project.getProperty("password")==null) {
 				project.setProperty("password.show", "not specified");
 			} else {
@@ -112,8 +139,9 @@
 				project.setProperty("password.show", "specified, but not shown");
 			}
 
-			// Setting project.name to maven.project.name if it has been
-			// passed by Maven. If not, set it to war.name from nwcloud.properties
+			// Setting project.name to maven.project.name if it could be queried from Maven.
+			// If not (e.g. Ant script not executed as Maven plugin), set it to war.name from nwcloud.properties.
+			try { project.setProperty("maven.project.name", this.session.getCurrentProject().getName()); } catch (err) { }
 			mavenprojectname = project.getProperty("maven.project.name");
 			warname = project.getProperty("war.name");
 			if (mavenprojectname==null) {
@@ -122,8 +150,9 @@
 				project.setProperty("project.name",mavenprojectname);
 			}
 
-			// Setting project.version to maven.project.version if it has been
-			// passed by Maven. If not, set it to an empty string.
+			// Setting project.version to maven.project.version if it could be queried from Maven.
+			// If not (e.g. Ant script not executed as Maven plugin), set it to an empty string.
+			try { project.setProperty("maven.project.version", this.session.getCurrentProject().getVersion()); } catch (err) { }
 			mavenprojectversion = project.getProperty("maven.project.version");
 			if (mavenprojectname==null) {
 				project.setProperty("project.version","");
@@ -177,6 +206,13 @@
 				}
 			}
 
+			// Set java-version.arg to hold the optional java-version argument if java-version is set in nwcloud.properties
+			if (project.getProperty("java-version")==null) {
+				project.setProperty("java-version.arg", "");
+			} else {
+				project.setProperty("java-version.arg", " --java-version " + project.getProperty("java-version"));
+			}
+
 			// Set source.set to either source from nwcloud.properties or compute from war dir, project name and version if not set
 			if (project.getProperty("source")==null) {
 				wardir=project.getProperty("war.dir");
@@ -199,31 +235,125 @@
 
 		]]> </script>
 
-
 	</target>
 
-    <!-- ============================================================ -->
-    <!-- Password: Query password if not given in properties file.    -->
-    <!-- ============================================================ -->
+    <!-- =================================================================================== -->
+    <!-- Password: Query password if not given in properties file or Maven's "settings.xml". -->
+    <!-- =================================================================================== -->
 
 	<target name="password">
 
-		<!-- Use JavaScript to query password if not already given in "password". -->
+		<!-- If password not provided in properties, check if matching server entry with password can be found in Maven's "settings.xml".
+		     If no matching server with password could be found, query the user for a password on the console. -->
 		<script language="javascript"><![CDATA[
 
 			if (project.getProperty("password")==null) {
-				var syscon = java.lang.System.console();
-				syscon.writer().println("No password for SAP NetWeaver Cloud user specified in \"nwcloud.properties\" file.")
-				syscon.writer().print("Please enter password: ")
-				syscon.writer().flush();
-				var passwd = new java.lang.String(syscon.readPassword());
-				project.setProperty("password.set", passwd);
+			
+				// ----------------------------------------------------------------------------------
+				// -- Check for (encrypted) passwords in Maven's "settings.xml" matching the setup --
+				// ----------------------------------------------------------------------------------
+	
+				// What we're doing in the following is:
+				//  - Get hold of the PluginContext that can be used to share key-value-pairs between the Mojos of a plugin.
+				//  - Put "host", "account" and "user" (if known) into the PluginContext.
+				//  - Execute our Mojo (goal) "getpwd" to check if there is a matching password stored in Maven's "settings.xml".
+				//  - If PluginContext now contains a "password" key, store its value as password in the project properties.
+	
+				// Importing the class that represents the Mojo we want to execute.
+				importClass(com.sap.research.maven.plugin.nwcloud.NWCloudGetPwd);
+
+				// Helper function to convert Mojo configuration
+				//  - A Mojo configuration that one can get using MojoDescriptor.getConfiguration() is of type org.codehaus.plexus.configuration.PlexusConfiguration.
+				//  - When we want to create a MojoExecution object to execute a Mojo, we need this config in Xpp3Dom format.
+				//  -> This function converts the config from PlexusConfiguration to Xpp3Dom format.
+			    function convertPlexusConfigurationToXpp3Dom(config) {
+					var result = new org.codehaus.plexus.util.xml.Xpp3Dom(config.getName());
+					result.setValue(config.getValue());
+					var name;
+			        for (name in config.getAttributeNames()) {
+			            result.setAttribute(config.getAttributeNames()[name], config.getAttribute(config.getAttributeNames()[name]));
+			        }
+					var child;
+					var children = config.getChildren();
+			        for (child in children) {
+						result.addChild(convertPlexusConfigurationToXpp3Dom(children[child]));
+					}
+			        return (result);
+			    }
+				
+				// org.apache.maven.execution.MavenSession
+				var ourSession = this.session;
+	
+				// org.apache.maven.project.MavenProject
+				var ourProject = this.session.getCurrentProject();
+				
+				// org.apache.maven.plugin.descriptor.PluginDescriptor
+				var ourPluginDescriptor = this.mojoExecution.getMojoDescriptor().getPluginDescriptor();
+				
+				// Get the PluginContext using org.apache.maven.execution.MavenSession.getPluginContext(...) function.
+				// The result is a Map which can be used to store key-value-pairs that are available in all Mojos of a plugin.
+				// Using this Map we can exchange data between all our Mojos. 
+				var pluginContext = ourSession.getPluginContext(ourPluginDescriptor, ourProject);
+				pluginContext.put("internal", "true");
+				if (project.getProperty("host")!=null) {
+					pluginContext.put("host", project.getProperty("host"));	
+				}
+				if (project.getProperty("account")!=null) {
+					pluginContext.put("account", project.getProperty("account"));	
+				}
+				if (project.getProperty("user")!=null) {
+					pluginContext.put("user", project.getProperty("user"));	
+				}
+	
+				// Using org.apache.maven.plugin.MojoExecution, we fetch an instance of org.apache.maven.model.Plugin representing our own plugin. 
+				var ourPlugin = this.mojoExecution.getPlugin();
+	
+				// For execution of a Mojo we need to provide some configuration in Xpp3Dom format.
+				// As we do not need to pass any additional parameters, we just create an empty Xpp3Dom named "configuration".
+				var ourConfig = new org.codehaus.plexus.util.xml.Xpp3Dom("configuration");
+				
+				// Now we get the goal "getpwd" of our plugin we want to execute.
+				// It is represented by an instance of org.apache.maven.plugin.descriptor.MojoDescriptor. 
+				var ourGoal = ourPluginDescriptor.getMojo("getpwd");
+				
+				// Now we merge our (currently empty) config for executing the Mojo with the config the Mojo needs.
+				// The config of the Mojo is a org.codehaus.plexus.configuration.PlexusConfiguration and needs to be converted to Xpp3Dom to be used by us.
+				// We use our small helper function "convertPlexusConfigurationToXpp3Dom" to get the transformation done.
+				ourConfig = org.codehaus.plexus.util.xml.Xpp3DomUtils.mergeXpp3Dom(ourConfig, convertPlexusConfigurationToXpp3Dom(ourGoal.getMojoConfiguration()));
+				
+				// Now that we have our goal (Mojo) and its configuration in proper format, we create a MojoExecution object for its execution.
+				var ourExecution = new org.apache.maven.plugin.MojoExecution(ourGoal, ourConfig);
+	
+				// To execute another Mojo, we need an instance of a class implementing org.apache.maven.plugin.BuildPluginManager.
+				// We ask the container we're running in for a matching Component (doing "manual depedency injection" here)  
+				var ourBuildPluginManager = this.session.getContainer().lookup(org.apache.maven.plugin.BuildPluginManager);
+	
+				// Finally we execute the create MojoExecution object in our MavenSession using the BuildPluginManager we got from the container. 
+				ourBuildPluginManager.executeMojo(ourSession, ourExecution);
+				
+				// Now we check if we got a result stored in key "password" in the PluginContext
+				if (pluginContext.containsKey("password")) {
+					project.setProperty("password.set", pluginContext.get("password"));
+				} else {
+			
+					// ----------------------------------------------------------------------------------
+					// -- If still no password found, then query user on console                       --
+					// ----------------------------------------------------------------------------------
+
+					var syscon = java.lang.System.console();
+					syscon.writer().println("No password for SAP NetWeaver Cloud user specified.")
+					syscon.writer().print("Please enter password: ")
+					syscon.writer().flush();
+					var passwd = new java.lang.String(syscon.readPassword());
+					project.setProperty("password.set", passwd);
+
+				}
+			
 			}
 
 		]]> </script>
 
 	</target>
-
 
     <!-- ============================================================ -->
     <!-- Usage: Show available targets and used settings (propeties)  -->
@@ -273,6 +403,7 @@
 		<echo message="application           = ${application}"/>
 		<echo message="component             = ${component}"/>
 		<echo message="url                   = ${url}"/>
+		<echo message="java-version          = ${java-version}"/>
 		<echo message="user                  = ${user}"/>
 		<echo message="password              = ${password.show}"/>
 		<echo message=""/>
@@ -286,8 +417,9 @@
 		<echo message="sdk.args              = ${sdk.args}"/>
 		<echo message="sdk.proxy.set         = ${sdk.proxy.set}"/>
 		<echo message="application.set       = ${application.set}"/>
-		<echo message="url.arg               = ${url.arg}"/>
 		<echo message="component.arg         = ${component.arg}"/>
+		<echo message="url.arg               = ${url.arg}"/>
+		<echo message="java-version.arg      = ${java-version.arg}"/>
 		<echo message="severity.arg          = ${severity.arg}"/>
 		<echo message="minimum-processes.arg = ${minimum-processes.arg}"/>
 		<echo message="maximum-processes.arg = ${maximum-processes.arg}"/>
@@ -298,6 +430,7 @@
 		<echo message="nwl.webapps           = ${nwl.webapps}"/>
 		<echo message="nwl.work              = ${nwl.work}"/>
 		<echo message=""/>
+
 	</target>
 
     <!-- ============================================================ -->
@@ -365,7 +498,7 @@
 				</fileset>
 			</classpath>
 			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
-			<arg line="deploy --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set} --source &quot;${source.unix}&quot;${url.arg}${component.arg}${severity.arg}${minimum-processes.arg}${maximum-processes.arg}"/>
+			<arg line="deploy --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set} --source &quot;${source.unix}&quot;${url.arg}${component.arg}${java-version.arg}${severity.arg}${minimum-processes.arg}${maximum-processes.arg}"/>
 		</java>
 	</target>
 
