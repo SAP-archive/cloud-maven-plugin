@@ -341,12 +341,13 @@
 					// ----------------------------------------------------------------------------------
 
 					var syscon = java.lang.System.console();
-					syscon.writer().println("No password for SAP NetWeaver Cloud user specified.")
-					syscon.writer().print("Please enter password: ")
-					syscon.writer().flush();
-					var passwd = new java.lang.String(syscon.readPassword());
-					project.setProperty("password.set", passwd);
-
+					if (syscon != null) {
+						syscon.writer().println("No password for SAP NetWeaver Cloud user specified.")
+						syscon.writer().print("Please enter password: ")
+						syscon.writer().flush();
+						var passwd = new java.lang.String(syscon.readPassword());
+						project.setProperty("password.set", passwd);
+					}
 				}
 			
 			}
