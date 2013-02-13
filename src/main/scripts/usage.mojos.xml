@@ -34,16 +34,31 @@
       <goal>deploy</goal>
       <call>deploy</call>
       <description>Deploy WAR as app to NW Cloud</description>
+      <parameters>
+        <parameter>
+          <property>application</property>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>start</goal>
       <call>start</call>
       <description>Start app instance on NW Cloud</description>
+      <parameters>
+        <parameter>
+          <property>application</property>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>stop</goal>
       <call>stop</call>
       <description>Stop app instance on NW Cloud</description>
+      <parameters>
+        <parameter>
+          <property>application</property>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>undeploy</goal>
@@ -54,6 +69,11 @@
       <goal>status</goal>
       <call>status</call>
       <description>Show status of app on NW Cloud</description>
+      <parameters>
+        <parameter>
+          <property>application</property>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>apps</goal>
