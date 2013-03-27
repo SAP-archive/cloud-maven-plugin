@@ -10,7 +10,7 @@ This is a plugin for Maven, which supports users in deploying web applications p
 How is it done?
 ---------------
 
-The Maven Plugin is a wrapped Ant build script (see `src/main/scripts/usage.build.xml`) which passes all needed parameters to "remote control" the [SAP HANA Cloud SDK](https://tools.netweaver.ondemand.com/) (Neo SDK) to execute the desired operations. This makes it easy for the user to stick on the console and just use Maven for building the web application as well as to deploy and run it on SAP NetWeaver Cloud. All parameters concerning deployment target (e.g. host, account, user for login) are taken from a file `nwcloud.properties` which needs to be placed in the root folder of the Maven project. If a user decides to even provide a SCN user's password there, then all operations can be fully automated, whithout the need of the user having to type in his/her password. This is espacially valuable if you want to fully automate build and deployment processes of your web application.
+The Maven Plugin is a wrapped Ant build script (see `src/main/scripts/usage.build.xml`) which passes all needed parameters to "remote control" the [SAP HANA Cloud SDK](https://tools.netweaver.ondemand.com/) (Neo SDK) to execute the desired operations. This makes it easy for the user to stick on the console and just use Maven for building the web application as well as to deploy and run it on SAP HANA Cloud. All parameters concerning deployment target (e.g. host, account, user for login) are taken from a file `nwcloud.properties` which needs to be placed in the root folder of the Maven project. If a user decides to even provide a SCN user's password there, then all operations can be fully automated, whithout the need of the user having to type in his/her password. This is espacially valuable if you want to fully automate build and deployment processes of your web application.
 
 
 Do you have a documented use case?
@@ -41,7 +41,7 @@ If you don't want to build the addon by yourself, but just use it, then please r
 
 2. Using
 
-	The addintional commands provided by the plugin are available after installation, but to be able to successfully execute these commands, the plugin relies on an installed version of the [SAP NetWeaver Cloud SDK](https://tools.netweaver.ondemand.com/) (Neo SDK). Download and extract it to a directory of your choice.
+	The addintional commands provided by the plugin are available after installation, but to be able to successfully execute these commands, the plugin relies on an installed version of the [SAP HANA Cloud SDK](https://tools.netweaver.ondemand.com/) (Neo SDK). Download and extract it to a directory of your choice.
 
 
 ### Building the plugin ###
@@ -111,7 +111,7 @@ If you created a `nwcloud.properties` file and you now package your web applicat
 	[echo] ---------------
 	[echo]
 	[echo] You could use the NWCloud-Maven-Plugin now to deploy your
-	[echo] app to SAP NetWeaver Cloud, or test it on a local instance.
+	[echo] app to SAP HANA Cloud, or test it on a local instance.
 	[echo]
 	[echo] To use the NWCloud-Maven-Plugin, type
 	[echo]
@@ -151,7 +151,7 @@ Depending on the speed of your network connection, the process of deploying and 
 	[java]   https://votingmyaccount.netweaver.ondemand.com
 	...
 
-After successful deployment and startup of the instance, we can now access our web application in the SAP NetWeaver Cloud. To do this, we need to append a slash `/` and the name of the web application at the end of the URL that is shown on the console after the startup of the instance. As the web application in our example is called `voting` we use the following URL in our favorite web browser to access it:
+After successful deployment and startup of the instance, we can now access our web application in the SAP HANA Cloud. To do this, we need to append a slash `/` and the name of the web application at the end of the URL that is shown on the console after the startup of the instance. As the web application in our example is called `voting` we use the following URL in our favorite web browser to access it:
 
 	https://votingmyaccount.netweaver.ondemand.com/voting
 
