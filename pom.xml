@@ -33,8 +33,8 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
-  <description>SAP NetWeaver Cloud Deployment Plugin for Maven</description>
-  <url>https://github.com/mispdev/nwcloud-maven-plugin</url>
+  <description>SAP HANA Cloud Deployment Plugin for Maven</description>
+  <url>https://github.com/SAP/cloud-maven-plugin</url>
   <dependencies>
 
     <!-- Dependencies for embedded ant scripts -->

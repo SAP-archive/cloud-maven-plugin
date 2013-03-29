@@ -32,7 +32,7 @@ import org.apache.maven.settings.crypto.SettingsDecryptionRequest;
 import org.apache.maven.settings.crypto.SettingsDecryptionResult;
 
 /**
- * This class defines the goal (mojo) "getpwd" of the Maven plugin for SAP NetWeaver Cloud.
+ * This class defines the goal (mojo) "getpwd" of the Maven plugin for SAP HANA Cloud.
  * 
  * Its main use is to be used internally by other mojos in case operations should be executed
  * which require a password, but no password was provided in the "nwcloud.properties" file.

@@ -342,7 +342,7 @@
 
 					var syscon = java.lang.System.console();
 					if (syscon != null) {
-						syscon.writer().println("No password for SAP NetWeaver Cloud user specified.")
+						syscon.writer().println("No password for SAP HANA Cloud user specified.")
 						syscon.writer().print("Please enter password: ")
 						syscon.writer().flush();
 						var passwd = new java.lang.String(syscon.readPassword());
@@ -362,24 +362,24 @@
 
 	<target name="usage" depends="init">
 		<echo message=""/>
-		<echo message="Ant build file for SAP NetWeaver Cloud deployment"/>
-		<echo message="================================================="/>
+		<echo message="Ant build file for SAP HANA Cloud deployment"/>
+		<echo message="============================================"/>
 		<echo message=""/>
 		<echo message="Available targets"/>
 		<echo message="-----------------"/>
 		<echo message=""/>
-		<echo message="deploy        ->  Deploy WAR as app to NW Cloud"/>
-		<echo message="start         ->  Start app instance on NW Cloud"/>
-		<echo message="stop          ->  Stop app instance on NW Cloud"/>
-		<echo message="undeploy      ->  Undeploy app from NW Cloud"/>
-		<echo message="status        ->  Show status of app on NW Cloud"/>
-		<echo message="apps          ->  Show apps deployed on NW Cloud account"/>
-		<echo message="comps         ->  Show components of deployed app on NW Cloud"/>
+		<echo message="deploy        ->  Deploy WAR as app to Cloud"/>
+		<echo message="start         ->  Start app instance on Cloud"/>
+		<echo message="stop          ->  Stop app instance on Cloud"/>
+		<echo message="undeploy      ->  Undeploy app from Cloud"/>
+		<echo message="status        ->  Show status of app on Cloud"/>
+		<echo message="apps          ->  Show apps deployed on Cloud account"/>
+		<echo message="comps         ->  Show components of deployed app on Cloud"/>
 		<echo message=""/>
-		<echo message="deploy-local  ->  Deploy WAR to local NW Cloud server"/>
-		<echo message="start-local   ->  Start local NW Cloud server"/>
-		<echo message="stop-local    ->  Stop local NW Cloud server"/>
-		<echo message="clean-local   ->  Delete WAR from local NW Cloud server"/>
+		<echo message="deploy-local  ->  Deploy WAR to local Cloud server"/>
+		<echo message="start-local   ->  Start local Cloud server"/>
+		<echo message="stop-local    ->  Stop local Cloud server"/>
+		<echo message="clean-local   ->  Delete WAR from local Cloud server"/>
 		<echo message=""/>
 		<echo message="Settings available in Ant"/>
 		<echo message="-------------------------"/>
@@ -455,7 +455,7 @@
 		<echo message="---------------"/>
 		<echo message=""/>
 		<echo message="You could use the NWCloud-Maven-Plugin now to deploy your"/>
-		<echo message="app to SAP NetWeaver Cloud, or test it on a local instance."/>
+		<echo message="app to SAP HANA Cloud, or test it on a local instance."/>
 		<echo message=""/>
 		<echo message="To use the NWCloud-Maven-Plugin, type"/>
 		<echo message=""/>
@@ -463,29 +463,29 @@
 		<echo message=""/>
 		<echo message="where &lt;goal&gt; is one of the following actions:"/>
 		<echo message=""/>
-		<echo message="deploy        ->  Deploy WAR as app to NW Cloud"/>
-		<echo message="start         ->  Start app instance on NW Cloud"/>
-		<echo message="stop          ->  Stop app instance on NW Cloud"/>
-		<echo message="undeploy      ->  Undeploy app from NW Cloud"/>
-		<echo message="status        ->  Show status of app on NW Cloud"/>
-		<echo message="apps          ->  Show apps deployed on NW Cloud account"/>
-		<echo message="comps         ->  Show components of deployed app on NW Cloud"/>
+		<echo message="deploy        ->  Deploy WAR as app to cloud"/>
+		<echo message="start         ->  Start app instance on cloud"/>
+		<echo message="stop          ->  Stop app instance on cloud"/>
+		<echo message="undeploy      ->  Undeploy app from cloud"/>
+		<echo message="status        ->  Show status of app on cloud"/>
+		<echo message="apps          ->  Show apps deployed on cloud account"/>
+		<echo message="comps         ->  Show components of deployed app on cloud"/>
 		<echo message=""/>
-		<echo message="deploy-local  ->  Deploy WAR to local NW Cloud server"/>
-		<echo message="start-local   ->  Start local NW Cloud server"/>
-		<echo message="stop-local    ->  Stop local NW Cloud server"/>
-		<echo message="clean-local   ->  Delete WAR from local NW Cloud server"/>
+		<echo message="deploy-local  ->  Deploy WAR to local cloud server"/>
+		<echo message="start-local   ->  Start local cloud server"/>
+		<echo message="stop-local    ->  Stop local cloud server"/>
+		<echo message="clean-local   ->  Delete WAR from local cloud server"/>
 		<echo message=""/>
 		<echo message="usage         ->  Show usage info and currently used settings"/>
 		<echo message=""/>
 	</target>
 
     <!-- ============================================================ -->
-    <!-- NW Cloud -->
+    <!-- HANA Cloud -->
     <!-- ============================================================ -->
 
-	<target name="deploy" description="Deploy WAR as app to NW Cloud" depends="init,password">
-		<!-- Copy WAR file to a name without version before deploying it (NW Cloud might derive web context from WAR name) -->
+	<target name="deploy" description="Deploy WAR as app to HANA Cloud" depends="init,password">
+		<!-- Copy WAR file to a name without version before deploying it (HANA Cloud might derive web context from WAR name) -->
 		<copy file="${source.set}" tofile="${war.dir}/${project.name}.war" preservelastmodified="true"/>
 		<pathconvert targetos="unix" property="source.unix">
 			<path>
@@ -503,7 +503,7 @@
 		</java>
 	</target>
 
-	<target name="start" description="Start app instance on NW Cloud" depends="init,password">
+	<target name="start" description="Start app instance on HANA Cloud" depends="init,password">
 		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
 			<classpath>
 				<fileset dir="${sdk.dir}/tools/lib/cmd">
@@ -515,7 +515,7 @@
 		</java>
 	</target>
 
-	<target name="stop" description="Stop app instance on NW Cloud" depends="init,password">
+	<target name="stop" description="Stop app instance on HANA Cloud" depends="init,password">
 		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
 			<classpath>
 				<fileset dir="${sdk.dir}/tools/lib/cmd">
@@ -527,7 +527,7 @@
 		</java>
 	</target>
 
-	<target name="undeploy" description="Undeploy app from NW Cloud" depends="init,password">
+	<target name="undeploy" description="Undeploy app from HANA Cloud" depends="init,password">
 		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
 			<classpath>
 				<fileset dir="${sdk.dir}/tools/lib/cmd">
@@ -539,7 +539,7 @@
 		</java>
 	</target>
 
-	<target name="status" description="Show status of app on NW Cloud" depends="init,password">
+	<target name="status" description="Show status of app on HANA Cloud" depends="init,password">
 		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
 			<classpath>
 				<fileset dir="${sdk.dir}/tools/lib/cmd">
@@ -551,7 +551,7 @@
 		</java>
 	</target>
 
-	<target name="apps" description="Show apps deployed on NW Cloud account" depends="init,password">
+	<target name="apps" description="Show apps deployed on HANA Cloud account" depends="init,password">
 		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
 			<classpath>
 				<fileset dir="${sdk.dir}/tools/lib/cmd">
@@ -563,7 +563,7 @@
 		</java>
 	</target>
 
-	<target name="comps" description="Show components of deployed app on NW Cloud" depends="init,password">
+	<target name="comps" description="Show components of deployed app on HANA Cloud" depends="init,password">
 		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
 			<classpath>
 				<fileset dir="${sdk.dir}/tools/lib/cmd">
@@ -576,11 +576,11 @@
 	</target>
 
     <!-- ============================================================ -->
-    <!-- Local NW Cloud -->
+    <!-- Local HANA Cloud -->
     <!-- ============================================================ -->
 
 	<target name="check-local-server" depends="init" unless="local.server.exists">
-		<echo>Creating local NW Cloud server..."</echo>
+		<echo>Creating local HANA Cloud server..."</echo>
 		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
 			<classpath>
 				<fileset dir="${sdk.dir}/tools/lib/cmd">
@@ -592,7 +592,7 @@
 		</java>
 	</target>
 
-	<target name="deploy-local" description="Deploy WAR to local NW Cloud server" depends="init,check-local-server">
+	<target name="deploy-local" description="Deploy WAR to local HANA Cloud server" depends="init,check-local-server">
 		<!-- Copy WAR file to a name without version before deploying it (server might derive web context from WAR name) -->
 		<copy file="${source.set}" tofile="${war.dir}/${project.name}.war" preservelastmodified="true"/>
 		<copy todir="${nwl.pickup}" preservelastmodified="true">
@@ -602,7 +602,7 @@
 		</copy>
 	</target>
 
-	<target name="start-local" description="Start local NW Cloud server" depends="init,check-local-server">
+	<target name="start-local" description="Start local HANA Cloud server" depends="init,check-local-server">
 		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
 			<classpath>
 				<fileset dir="${sdk.dir}/tools/lib/cmd">
@@ -614,7 +614,7 @@
 		</java>
 	</target>
 
-	<target name="stop-local" description="Stop local NW Cloud server" depends="init,check-local-server">
+	<target name="stop-local" description="Stop local HANA Cloud server" depends="init,check-local-server">
 		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
 			<classpath>
 				<fileset dir="${sdk.dir}/tools/lib/cmd">
@@ -626,7 +626,7 @@
 		</java>
 	</target>
 
-	<target name="clean-local" description="Delete WAR from local NW Cloud server" depends="init">
+	<target name="clean-local" description="Delete WAR from local HANA Cloud server" depends="init">
 		<delete failonerror="false">
 			<fileset dir="${nwl.pickup}">
 				<include name="${project.name}.war"/>
