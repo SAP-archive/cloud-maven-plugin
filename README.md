@@ -120,6 +120,7 @@ If you created a `nwcloud.properties` file and you now package your web applicat
 	[echo] where <goal> is one of the following actions:
 	[echo]
 	[echo] deploy        ->  Deploy WAR as app to cloud
+	[echo] deploy-dir    ->  Deploy all WARs from directory specified in 'source' parameter as app to cloud
 	[echo] start         ->  Start app instance on cloud
 	[echo] stop          ->  Stop app instance on cloud
 	[echo] undeploy      ->  Undeploy app from cloud
@@ -241,6 +242,20 @@ Template for nwcloud.properties file
 	# Specifies whether to start/stop an application synchronously (optinal, defaults to false).
 	# Allowed values are: true|false
 	synchronous=true
+	
+	# Enable or disable gzip response compression (optional, default off)
+	# Allowed values are: on (allow compression), off (disable compression), force (forces compression for all responses) or an integer (which enables compression and specifies the compression-min-size value in bytes).
+	#compression = on 
+	
+	# A comma separated list of MIME types for which compression will be used
+    # Default: text/html,text/xml,text/plain
+    # Condition: applicable if compression is enabled
+    #compressible-mime-type=text/html,text/xml,text/plain
+    
+    # Responses bigger than this value get compressed
+    # Default: 2048 bytes
+	# Condition: applicable if compression is enabled
+	#compression-min-size=2048
 
 	# -----------------------------------------------------------------------------
 	# Manually define WAR file to deploy
@@ -253,6 +268,9 @@ Template for nwcloud.properties file
 
 	# Option 2: Specify full path and name of WAR (including ".war")
 	#source=c:\\Demo\\MyAppProjectFolder\\target\\myapp.war
+
+	# Option 3: For target 'deploy-dir' specify a path. Path can be relative to the project directory or a full path. 
+	#source=target
 
 
 Setup the basics for deployment
@@ -356,6 +374,14 @@ Please be aware that in this case of manual testing (and ONLY in this case) the 
 
 Version history
 ---------------
+
+**1.0.1.RELEASE.a1**
+- Added `deploy-dir` target for deploying multiple web-apps from directories specified in parameter `source`. Source parameter can be a comma-separated list of directories. Each directory can be relative to the project base dir or absolute.
+- Added support for parameters in the configuration section of the maven plugin. So nwcloud.properties can be omitted.
+- Added support for parameter `vm-argument` in `nwcloud.properties`.
+- Added support for parameter `compression` in `nwcloud.properties`.
+- Added support for parameter `compressible-mime-type` in `nwcloud.properties`.
+- Added support for parameter `compression-min-size` in `nwcloud.properties`.
 
 **1.0.1.RELEASE**
 - Added support for parameter `java-version` in `nwcloud.properties`.
