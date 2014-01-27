@@ -23,68 +23,572 @@
       <goal>usage</goal>
       <call>usage</call>
       <description>Show usage info and currently used settings</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>hint</goal>
       <call>hint</call>
       <description>Show hint on what to do after packaging</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+
+      </parameters>
     </mojo>
     <!-- HANA Cloud goals -->
     <mojo>
       <goal>deploy</goal>
       <call>deploy</call>
       <description>Deploy WAR as app to HANA Cloud</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>application</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>account</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>host</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>source</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>severity</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>minimum-processes</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>maximum-processes</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>compression</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>compressible-mime-type</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>compression-min-size</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>vm-argument</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>      
     </mojo>
+    <mojo>
+      <goal>deploy-dir</goal>
+      <call>deploy-dir</call>
+      <description>Deploy all WARs from directory specified in 'source' parameter as app to cloud</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>application</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>account</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>host</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>component</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>synchronous</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>source</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>severity</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>minimum-processes</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>maximum-processes</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>compression</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>compressible-mime-type</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>compression-min-size</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>vm-argument</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
+    </mojo>    
     <mojo>
       <goal>start</goal>
       <call>start</call>
       <description>Start app instance on HANA Cloud</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>application</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>account</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>host</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>component</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>synchronous</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>source</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>severity</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>minimum-processes</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>maximum-processes</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>compression</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>compressible-mime-type</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>compression-min-size</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>vm-argument</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>      
     </mojo>
     <mojo>
       <goal>stop</goal>
       <call>stop</call>
       <description>Stop app instance on HANA Cloud</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>application</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>account</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>host</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>component</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>synchronous</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>undeploy</goal>
       <call>undeploy</call>
       <description>Undeploy app from HANA Cloud</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>application</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>account</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>host</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>component</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>status</goal>
       <call>status</call>
       <description>Show status of app on HANA Cloud</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>application</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>account</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>host</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>apps</goal>
       <call>apps</call>
       <description>Show apps deployed on HANA Cloud account</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>account</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>host</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>comps</goal>
       <call>comps</call>
       <description>Show components of deployed app on HANA Cloud</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>application</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>account</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>host</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
     </mojo>
     <!-- Local HANA Cloud goals -->
     <mojo>
       <goal>deploy-local</goal>
       <call>deploy-local</call>
       <description>Deploy WAR to local HANA Cloud server</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>start-local</goal>
       <call>start-local</call>
       <description>Start local HANA Cloud server</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>stop-local</goal>
       <call>stop-local</call>
       <description>Stop local HANA Cloud server</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
     </mojo>
     <mojo>
       <goal>clean-local</goal>
       <call>clean-local</call>
       <description>Delete WAR from local HANA Cloud server</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>
     </mojo>
   </mojos>
 </pluginMetadata>
