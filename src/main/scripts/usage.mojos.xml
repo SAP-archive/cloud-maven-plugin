@@ -374,6 +374,53 @@
       </parameters>
     </mojo>
     <mojo>
+      <goal>restart</goal>
+      <call>restart</call>
+      <description>Restart an app instance on HANA Cloud</description>
+      <parameters>
+        <parameter>
+          <name>sdk.dir</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>sdk.proxy</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>application</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>account</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>host</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+        <parameter>
+          <name>synchronous</name>
+          <readonly>false</readonly>
+          <type>java.lang.String</type>
+        </parameter>
+      </parameters>      
+    </mojo>
+    <mojo>
       <goal>undeploy</goal>
       <call>undeploy</call>
       <description>Undeploy app from HANA Cloud</description>

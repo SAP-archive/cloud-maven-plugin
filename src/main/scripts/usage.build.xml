@@ -400,6 +400,7 @@
 		<echo message="deploy-dir    ->  Deploy all WARs from directory specified in 'source' parameter as app to cloud"/>
 		<echo message="start         ->  Start app instance on Cloud"/>
 		<echo message="stop          ->  Stop app instance on Cloud"/>
+		<echo message="restart       ->  Restart app instance on Cloud"/>
 		<echo message="undeploy      ->  Undeploy app from Cloud"/>
 		<echo message="status        ->  Show status of app on Cloud"/>
 		<echo message="apps          ->  Show apps deployed on Cloud account"/>
@@ -500,6 +501,7 @@
 		<echo message="deploy-dir    ->  Deploy all WARs from directory specified in 'source' parameter as app to cloud"/>
 		<echo message="start         ->  Start app instance on cloud"/>
 		<echo message="stop          ->  Stop app instance on cloud"/>
+		<echo message="restart       ->  Restart app instance on Cloud"/>
 		<echo message="undeploy      ->  Undeploy app from cloud"/>
 		<echo message="status        ->  Show status of app on cloud"/>
 		<echo message="apps          ->  Show apps deployed on cloud account"/>
@@ -570,6 +572,18 @@
 			</classpath>
 			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
 			<arg line="stop --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set}${component.arg}${synchronous.arg}"/>
+		</java>
+	</target>
+	
+	<target name="restart" description="Restart app instance on HANA Cloud" depends="init,password">
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
+			<arg line="restart --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set}${synchronous.arg}"/>
 		</java>
 	</target>
 
