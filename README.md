@@ -81,7 +81,7 @@ The easiest way to use the plugin with your Maven managed web application is to 
             <plugin>
                 <groupId>com.sap.research</groupId>
                 <artifactId>nwcloud-maven-plugin</artifactId>
-				<version>1.0.1.RELEASE</version>
+				<version>1.0.2.RELEASE</version>
 				<executions>
 					<execution>
 						<id>after.package</id>
@@ -156,9 +156,6 @@ After successful deployment and startup of the instance, we can now access our w
 	https://votingmyaccount.hana.ondemand.com/voting
 
 
-
-
-
 Additional information
 ----------------------
 
@@ -170,6 +167,7 @@ This project is copyrighted by [SAP AG](http://www.sap.com/) and made available 
 ### Contributions ###
 
 Contributions to this project are very welcome, but can only be accepted if the contributions themselves are given to the project under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html). Contributions other than those given under Apache License 2.0 will be rejected.
+
 
 Appendix
 ========
@@ -326,7 +324,7 @@ A server definition could look like this:
 	<servers>
 		[...]
 		<server>
-			<id>nwcloud-01</id>
+			<id>hanacloud-01</id>
 			<password>{COQLCE6DU6GtcS5P=}</password>
 			<configuration>
 				<host>https://hanatrial.ondemand.com</host>
@@ -357,7 +355,12 @@ Please be aware that in this case of manual testing (and ONLY in this case) the 
 Version history
 ---------------
 
+**1.0.2.RELEASE**
+
+- Fixed compatibility issue with new JavaScript engine "Nashorn" of Java 8.
+
 **1.0.1.RELEASE**
+
 - Added support for parameter `java-version` in `nwcloud.properties`.
 - Added support for encrypted password storage in Maven’s `settings.xml` (see section "Using encrypted passwords" in this document for details).
 - Improved autodetection of proxy settings by taking Maven settings into account.

@@ -47,7 +47,7 @@
 
 		<!-- Use JavaScript to compute some properties -->
 		<script language="javascript"><![CDATA[
-			
+
 			// Define trim() function for Strings, if not already defined
 			if (!String.trim) {
 				String.prototype.trim = function () {
@@ -66,8 +66,8 @@
 				if (project.getProperty("env.HTTPS_PROXY_PORT")      !=null) proxyargs += " -Dhttps.proxyPort="     + project.getProperty("env.HTTPS_PROXY_PORT");
 				if (project.getProperty("env.HTTP_NON_PROXY_HOSTS")  !=null) proxyargs += " -Dhttp.nonProxyHosts="  + project.getProperty("env.HTTP_NON_PROXY_HOSTS");
 				if (project.getProperty("env.HTTPS_NON_PROXY_HOSTS") !=null) proxyargs += " -Dhttps.nonProxyHosts=" + project.getProperty("env.HTTPS_NON_PROXY_HOSTS");
-			
-			    // Try to fetch from environment variables - the Unix way...
+
+				// Try to fetch from environment variables - the Unix way...
 				if (proxyargs=="") {
 					var envvar = null;
 					if (project.getProperty("env.HTTP_PROXY") !=null) envvar=project.getProperty("env.HTTP_PROXY");
@@ -113,7 +113,7 @@
 								// This might look weird, but Maven just uses the first active proxy in 'settings.xml' - either http or https.
 								// For convenience we set this one proxy for both protocols. If separate proxies are needed, then use environment
 								// variables or override proxy settings in 'nwcloud.properties'.
-								if ((mavenProxy.getProtocol().toLowerCase()=="http") || (mavenProxy.getProtocol().toLowerCase()=="https")) {								
+								if ((mavenProxy.getProtocol().toLowerCase()=="http") || (mavenProxy.getProtocol().toLowerCase()=="https")) {
 									if (mavenProxy.getHost()          !=null) proxyargs += " -Dhttp.proxyHost="        + mavenProxy.getHost();
 									if (mavenProxy.getPort()          !=null) proxyargs += " -Dhttp.proxyPort="        + mavenProxy.getPort();
 									if (mavenProxy.getNonProxyHosts() !=null) proxyargs += " -Dhttp.nonProxyHosts=\""  + mavenProxy.getNonProxyHosts() + "\"";
@@ -125,7 +125,7 @@
 		        		}
 					} catch(err) { }
 				}
-		
+
 				project.setProperty("sdk.proxy.set", proxyargs.trim());
 			} else {
 				project.setProperty("sdk.proxy.set", project.getProperty("sdk.proxy"));
@@ -248,94 +248,106 @@
 		<script language="javascript"><![CDATA[
 
 			if (project.getProperty("password")==null) {
-			
+
 				// ----------------------------------------------------------------------------------
 				// -- Check for (encrypted) passwords in Maven's "settings.xml" matching the setup --
 				// ----------------------------------------------------------------------------------
-	
+
 				// What we're doing in the following is:
 				//  - Get hold of the PluginContext that can be used to share key-value-pairs between the Mojos of a plugin.
 				//  - Put "host", "account" and "user" (if known) into the PluginContext.
 				//  - Execute our Mojo (goal) "getpwd" to check if there is a matching password stored in Maven's "settings.xml".
 				//  - If PluginContext now contains a "password" key, store its value as password in the project properties.
-	
-				// Importing the class that represents the Mojo we want to execute.
-				importClass(com.sap.research.maven.plugin.nwcloud.NWCloudGetPwd);
+
+				// In order to import the Java class that implements our password mojo, we used the "importClass" function of the
+				// "Rhino" JavaScript engine that was used before Java 8:
+				//
+				// 		importClass(com.sap.research.maven.plugin.nwcloud.NWCloudGetPwd);
+				// 
+				// Java 8 started to use another JavaScript engine named "Nashorn", which does not have a "importClass" function.
+				// One is able to detect if "Nashorn" is running by testing if "load" is a function. Once we know that we run
+				// "Nashorn" we could load a compatibility library to add the missing "importClass" function (and others) like this:
+				//
+				//		load("nashorn:mozilla_compat.js");
+				// 
+				// But instead we will just create a property having the name of our Java class and pointing to the actual Java class.
+				// This works in "Rhino" as well as in "Nashorn", so we do not need to check the execution environment at all.
+				this["NWCloudGetPwd"] = com.sap.research.maven.plugin.nwcloud.NWCloudGetPwd;
 
 				// Helper function to convert Mojo configuration
 				//  - A Mojo configuration that one can get using MojoDescriptor.getConfiguration() is of type org.codehaus.plexus.configuration.PlexusConfiguration.
 				//  - When we want to create a MojoExecution object to execute a Mojo, we need this config in Xpp3Dom format.
 				//  -> This function converts the config from PlexusConfiguration to Xpp3Dom format.
-			    function convertPlexusConfigurationToXpp3Dom(config) {
+				function convertPlexusConfigurationToXpp3Dom(config) {
 					var result = new org.codehaus.plexus.util.xml.Xpp3Dom(config.getName());
 					result.setValue(config.getValue());
 					var name;
-			        for (name in config.getAttributeNames()) {
-			            result.setAttribute(config.getAttributeNames()[name], config.getAttribute(config.getAttributeNames()[name]));
-			        }
+					for (name in config.getAttributeNames()) {
+						result.setAttribute(config.getAttributeNames()[name], config.getAttribute(config.getAttributeNames()[name]));
+					}
 					var child;
 					var children = config.getChildren();
-			        for (child in children) {
+					for (child in children) {
 						result.addChild(convertPlexusConfigurationToXpp3Dom(children[child]));
 					}
-			        return (result);
+					return (result);
 			    }
-				
+
 				// org.apache.maven.execution.MavenSession
 				var ourSession = this.session;
-	
+
 				// org.apache.maven.project.MavenProject
 				var ourProject = this.session.getCurrentProject();
-				
+
 				// org.apache.maven.plugin.descriptor.PluginDescriptor
 				var ourPluginDescriptor = this.mojoExecution.getMojoDescriptor().getPluginDescriptor();
-				
+
 				// Get the PluginContext using org.apache.maven.execution.MavenSession.getPluginContext(...) function.
 				// The result is a Map which can be used to store key-value-pairs that are available in all Mojos of a plugin.
 				// Using this Map we can exchange data between all our Mojos. 
 				var pluginContext = ourSession.getPluginContext(ourPluginDescriptor, ourProject);
 				pluginContext.put("internal", "true");
 				if (project.getProperty("host")!=null) {
-					pluginContext.put("host", project.getProperty("host"));	
+					pluginContext.put("host", project.getProperty("host"));
 				}
 				if (project.getProperty("account")!=null) {
-					pluginContext.put("account", project.getProperty("account"));	
+					pluginContext.put("account", project.getProperty("account"));
 				}
 				if (project.getProperty("user")!=null) {
-					pluginContext.put("user", project.getProperty("user"));	
+					pluginContext.put("user", project.getProperty("user"));
 				}
-	
-				// Using org.apache.maven.plugin.MojoExecution, we fetch an instance of org.apache.maven.model.Plugin representing our own plugin. 
+
+				// Using org.apache.maven.plugin.MojoExecution, we fetch an instance of org.apache.maven.model.Plugin representing our own plugin.
 				var ourPlugin = this.mojoExecution.getPlugin();
-	
+
 				// For execution of a Mojo we need to provide some configuration in Xpp3Dom format.
 				// As we do not need to pass any additional parameters, we just create an empty Xpp3Dom named "configuration".
 				var ourConfig = new org.codehaus.plexus.util.xml.Xpp3Dom("configuration");
-				
+
 				// Now we get the goal "getpwd" of our plugin we want to execute.
 				// It is represented by an instance of org.apache.maven.plugin.descriptor.MojoDescriptor. 
 				var ourGoal = ourPluginDescriptor.getMojo("getpwd");
-				
+
 				// Now we merge our (currently empty) config for executing the Mojo with the config the Mojo needs.
 				// The config of the Mojo is a org.codehaus.plexus.configuration.PlexusConfiguration and needs to be converted to Xpp3Dom to be used by us.
 				// We use our small helper function "convertPlexusConfigurationToXpp3Dom" to get the transformation done.
 				ourConfig = org.codehaus.plexus.util.xml.Xpp3DomUtils.mergeXpp3Dom(ourConfig, convertPlexusConfigurationToXpp3Dom(ourGoal.getMojoConfiguration()));
-				
+
 				// Now that we have our goal (Mojo) and its configuration in proper format, we create a MojoExecution object for its execution.
 				var ourExecution = new org.apache.maven.plugin.MojoExecution(ourGoal, ourConfig);
-	
+
 				// To execute another Mojo, we need an instance of a class implementing org.apache.maven.plugin.BuildPluginManager.
-				// We ask the container we're running in for a matching Component (doing "manual depedency injection" here)  
-				var ourBuildPluginManager = this.session.getContainer().lookup(org.apache.maven.plugin.BuildPluginManager);
-	
-				// Finally we execute the create MojoExecution object in our MavenSession using the BuildPluginManager we got from the container. 
+				// We ask the container we're running in for a matching Component (doing "manual depedency injection" here)
+				var ourBuildPluginManager = ourSession.getContainer().lookup("org.apache.maven.plugin.BuildPluginManager");
+
+				// Finally we execute the create MojoExecution object in our MavenSession using the BuildPluginManager we got from the container.
 				ourBuildPluginManager.executeMojo(ourSession, ourExecution);
-				
+
 				// Now we check if we got a result stored in key "password" in the PluginContext
 				if (pluginContext.containsKey("password")) {
 					project.setProperty("password.set", pluginContext.get("password"));
 				} else {
-			
+
 					// ----------------------------------------------------------------------------------
 					// -- If still no password found, then query user on console                       --
 					// ----------------------------------------------------------------------------------
@@ -349,7 +361,7 @@
 						project.setProperty("password.set", passwd);
 					}
 				}
-			
+
 			}
 
 		]]> </script>
