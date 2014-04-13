@@ -81,7 +81,7 @@ The easiest way to use the plugin with your Maven managed web application is to 
             <plugin>
                 <groupId>com.sap.research</groupId>
                 <artifactId>nwcloud-maven-plugin</artifactId>
-				<version>1.0.2.RELEASE</version>
+				<version>1.0.3.RELEASE</version>
 				<executions>
 					<execution>
 						<id>after.package</id>
@@ -120,6 +120,7 @@ If you created a `nwcloud.properties` file and you now package your web applicat
 	[echo] where <goal> is one of the following actions:
 	[echo]
 	[echo] deploy        ->  Deploy WAR as app to cloud
+	[echo] deploy-dir    ->  Deploy all WARs from 'source' param path to cloud
 	[echo] start         ->  Start app instance on cloud
 	[echo] stop          ->  Stop app instance on cloud
 	[echo] undeploy      ->  Undeploy app from cloud
@@ -226,6 +227,10 @@ Template for nwcloud.properties file
 	# Request specific Java runtime version for execution of deployed components (optional, defaults to Java 6).
 	#java-version=7
 
+	# Pass addtional arguments to the Java Virtual Machine executing the deployed components (optional).
+	#  - Example: Set "-Dcurrency=EUR" and access in your app using System.getProperty("currency").
+	#vm-arguments=-Dcurrency=EUR
+
 	# The logging level of the server process(es) (optional, defaults to "error").
 	# Allowed values are: error|warn|info|debug
 	#severity=debug
@@ -240,6 +245,24 @@ Template for nwcloud.properties file
 	# Allowed values are: true|false
 	synchronous=true
 
+	# Enable or disable gzip response compression (optional, default off)
+	# Allowed values are:
+	#  - on (allow compression)
+	#  - off (disable compression)
+	#  - force (forces compression for all responses)
+	#  - an integer (which enables compression and specifies the compression-min-size value in bytes)
+	#compression=on
+
+	# A comma separated list of MIME types for which compression will be used
+    # Default: text/html,text/xml,text/plain
+    # Condition: applicable if compression is enabled
+    #compressible-mime-type=text/html,text/xml,text/plain
+    
+    # Responses bigger than this value get compressed
+    # Default: 2048 bytes
+	# Condition: applicable if compression is enabled
+	#compression-min-size=2048
+
 	# -----------------------------------------------------------------------------
 	# Manually define WAR file to deploy
 	# -----------------------------------------------------------------------------
@@ -252,11 +275,16 @@ Template for nwcloud.properties file
 	# Option 2: Specify full path and name of WAR (including ".war")
 	#source=c:\\Demo\\MyAppProjectFolder\\target\\myapp.war
 
+	# Option 3: Use target "deploy-dir" and specify a comma-separeted list of pathes to deploy multiple WAR or JAR files at once.
+	#  - Pathes can be relative to the project directory or can be a full path. 
+	#source=c:\\Demo\\MyAppProjectFolder\\target1,c:\\Demo\\MyAppProjectFolder\\target2
+
 
 Setup the basics for deployment
 -------------------------------
 
 It is important that you adjust the file `nwcloud.properties` according to your needs, before you can actually do a real deployment. You need to define:
+
 - your SCN user (to be able to access SAP HANA Cloud),
 - the desired target of deployment, and
 - the location of the SAP HANA Cloud SDK.
@@ -315,6 +343,7 @@ As a first step to use this feature, add a server with your encrypted SCN user p
 [http://maven.apache.org/guides/mini/guide-encryption.html](http://maven.apache.org/guides/mini/guide-encryption.html)
 
 This server will represent a SAP HANA Cloud landscape we want to deploy to. To be able to identify the correct server definition (and according SCN user's password) later on, we further describe the server using a `configuration` tag, with one, two or three of the following sub tags:
+
 - `host`
 - `account`
 - `user`
@@ -352,8 +381,54 @@ For testing purposes you can use the following command to see which server is ma
 Please be aware that in this case of manual testing (and ONLY in this case) the matched server as well as its decrypted password will be printed to the console in clear text.
 
 
+Defining parameters in pom.xml
+------------------------------
+
+In addition to defining parameters in `nwcloud.properties` file, one is also able to define parameters in the plugin configuration of `pom.xml`. As an example imagine adding the following lines at the end of the build plugins section of `pom.xml`:
+
+	<build>
+		<plugins>
+			...
+            <plugin>
+                <groupId>com.sap.research</groupId>
+                <artifactId>nwcloud-maven-plugin</artifactId>
+				<version>1.0.3.RELEASE</version>
+				<configuration>
+					<sdk.dir>c:\\Program Files\\Neo-SDK</sdk.dir>
+					<host>https://hana.ondemand.com</host>
+					<account>myaccount</account>
+					<user>myscnuser</user>
+				</configuration>
+				<executions>
+					<execution>
+						<id>after.package</id>
+						<phase>package</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+            </plugin>
+		</plugins>
+	</build>
+
+This example would cause automatic deployment of the created WAR file at the end of the build process. The needed deployment parameters `sdk.dir`, `host`, `account`, and `user` are defined in the `configuration` section of the Maven plugin. When defining the parameters directly in the `configuration` section, you may omit the `nwcloud.properties` file completely.
+
+> **Note**: It is _not_ recommended to pass parameters in `pom.xml` instead of `nwcloud.properties`, as you end up mixing build and deployment configuration.
+
+
 Version history
 ---------------
+
+**1.0.3.RELEASE**
+
+- Added `restart` goal to restart an application in the cloud.
+- Added `deploy-dir` goal for deploying multiple WARs from comma-seperated dir list specified in parameter `source`.
+- Added support for parameter `vm-arguments` in `nwcloud.properties`.
+- Added support for parameter `compression` in `nwcloud.properties`.
+- Added support for parameter `compressible-mime-type` in `nwcloud.properties`.
+- Added support for parameter `compression-min-size` in `nwcloud.properties`.
+- Added support for passing parameters directly via plugin configuration in `pom.xml`.
 
 **1.0.2.RELEASE**
 

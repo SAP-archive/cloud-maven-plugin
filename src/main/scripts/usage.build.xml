@@ -233,6 +233,34 @@
 				project.setProperty("application.set", project.getProperty("application"));
 			}
 
+			// Set compression.arg if it is set in nwcloud.properties.
+			if (project.getProperty("compression")==null) {
+				project.setProperty("compression.arg", "");
+			} else {
+				project.setProperty("compression.arg", " --compression " + project.getProperty("compression"));
+			}
+
+			// Set compressible-mime-type.arg if it is set in nwcloud.properties.
+			if (project.getProperty("compressible-mime-type")==null) {
+				project.setProperty("compressible-mime-type.arg", "");
+			} else {
+				project.setProperty("compressible-mime-type.arg", " --compressible-mime-type " + project.getProperty("compressible-mime-type"));
+			}
+
+			// Set compression-min-size.arg if it is set in nwcloud.properties.
+			if (project.getProperty("compression-min-size")==null) {
+				project.setProperty("compression-min-size.arg", "");
+			} else {
+				project.setProperty("compression-min-size.arg", " --compression-min-size " + project.getProperty("compression-min-size"));
+			}
+
+			// Set vm-arguments.arg if it is set in nwcloud.properties.
+			if (project.getProperty("vm-arguments")==null) {
+				project.setProperty("vm-arguments.arg", "");
+			} else {
+				project.setProperty("vm-arguments.arg", " --vm-arguments " + project.getProperty("vm-arguments"));
+			}
+
 		]]> </script>
 
 	</target>
@@ -381,8 +409,10 @@
 		<echo message="-----------------"/>
 		<echo message=""/>
 		<echo message="deploy        ->  Deploy WAR as app to Cloud"/>
+		<echo message="deploy-dir    ->  Deploy all WARs from 'source' param path to cloud"/>
 		<echo message="start         ->  Start app instance on Cloud"/>
 		<echo message="stop          ->  Stop app instance on Cloud"/>
+		<echo message="restart       ->  Restart app instance on Cloud"/>
 		<echo message="undeploy      ->  Undeploy app from Cloud"/>
 		<echo message="status        ->  Show status of app on Cloud"/>
 		<echo message="apps          ->  Show apps deployed on Cloud account"/>
@@ -396,52 +426,64 @@
 		<echo message="Settings available in Ant"/>
 		<echo message="-------------------------"/>
 		<echo message=""/>
-		<echo message="basedir               = ${basedir}"/>
+		<echo message="basedir                    = ${basedir}"/>
 		<echo message=""/>
 		<echo message="Settings passed by Maven"/>
 		<echo message="------------------------"/>
 		<echo message=""/>
-		<echo message="maven.project.name    = ${maven.project.name}"/>
-		<echo message="maven.project.version = ${maven.project.version}"/>
+		<echo message="maven.project.name         = ${maven.project.name}"/>
+		<echo message="maven.project.version      = ${maven.project.version}"/>
 		<echo message=""/>
 		<echo message="Settings from nwcloud.properties"/>
 		<echo message="--------------------------------"/>
 		<echo message=""/>
-		<echo message="war.name              = ${war.name}"/>
-		<echo message="source                = ${source}"/>
-		<echo message="sdk.dir               = ${sdk.dir}"/>
-		<echo message="sdk.proxy             = ${sdk.proxy}"/>
-		<echo message="host                  = ${host}"/>
-		<echo message="account               = ${account}"/>
-		<echo message="application           = ${application}"/>
-		<echo message="component             = ${component}"/>
-		<echo message="url                   = ${url}"/>
-		<echo message="java-version          = ${java-version}"/>
-		<echo message="user                  = ${user}"/>
-		<echo message="password              = ${password.show}"/>
+		<echo message="war.name                   = ${war.name}"/>
+		<echo message="source                     = ${source}"/>
+		<echo message="sdk.dir                    = ${sdk.dir}"/>
+		<echo message="sdk.proxy                  = ${sdk.proxy}"/>
+		<echo message="host                       = ${host}"/>
+		<echo message="account                    = ${account}"/>
+		<echo message="application                = ${application}"/>
+		<echo message="component                  = ${component}"/>
+		<echo message="url                        = ${url}"/>
+		<echo message="java-version               = ${java-version}"/>
+		<echo message="vm-arguments               = ${vm-arguments}"/>
+		<echo message="severity                   = ${severity}"/>
+		<echo message="minimum-processes          = ${minimum-processes}"/>
+		<echo message="maximum-processes          = ${maximum-processes}"/>
+		<echo message="synchronous                = ${synchronous}"/>
+		<echo message="compression                = ${compression}"/>
+		<echo message="compressible-mime-type     = ${compressible-mime-type}"/>
+		<echo message="compression-min-size       = ${compression-min-size}"/>
+		<echo message="user                       = ${user}"/>
+		<echo message="password                   = ${password.show}"/>	
 		<echo message=""/>
 		<echo message="Settings derived"/>
 		<echo message="----------------"/>
 		<echo message=""/>
-		<echo message="project.name          = ${project.name}"/>
-		<echo message="project.version       = ${project.version}"/>
-		<echo message="war.dir               = ${war.dir}"/>
-		<echo message="source.set            = ${source.set}"/>
-		<echo message="sdk.args              = ${sdk.args}"/>
-		<echo message="sdk.proxy.set         = ${sdk.proxy.set}"/>
-		<echo message="application.set       = ${application.set}"/>
-		<echo message="component.arg         = ${component.arg}"/>
-		<echo message="url.arg               = ${url.arg}"/>
-		<echo message="java-version.arg      = ${java-version.arg}"/>
-		<echo message="severity.arg          = ${severity.arg}"/>
-		<echo message="minimum-processes.arg = ${minimum-processes.arg}"/>
-		<echo message="maximum-processes.arg = ${maximum-processes.arg}"/>
-		<echo message="synchronous.arg       = ${synchronous.arg}"/>
-		<echo message="local.server.exists   = ${local.server.exists}"/>
-		<echo message="nwl.dir               = ${nwl.dir}"/>
-		<echo message="nwl.pickup            = ${nwl.pickup}"/>
-		<echo message="nwl.webapps           = ${nwl.webapps}"/>
-		<echo message="nwl.work              = ${nwl.work}"/>
+		<echo message="project.name               = ${project.name}"/>
+		<echo message="project.version            = ${project.version}"/>
+		<echo message="war.dir                    = ${war.dir}"/>
+		<echo message="source.set                 = ${source.set}"/>
+		<echo message="sdk.args                   = ${sdk.args}"/>
+		<echo message="sdk.proxy.set              = ${sdk.proxy.set}"/>
+		<echo message="application.set            = ${application.set}"/>
+		<echo message="component.arg              = ${component.arg}"/>
+		<echo message="url.arg                    = ${url.arg}"/>
+		<echo message="java-version.arg           = ${java-version.arg}"/>
+		<echo message="vm-arguments.arg           = ${vm-arguments.arg}"/>
+		<echo message="severity.arg               = ${severity.arg}"/>
+		<echo message="minimum-processes.arg      = ${minimum-processes.arg}"/>
+		<echo message="maximum-processes.arg      = ${maximum-processes.arg}"/>
+		<echo message="synchronous.arg            = ${synchronous.arg}"/>
+		<echo message="compression.arg            = ${compression.arg}"/>
+		<echo message="compressible-mime-type.arg = ${compressible-mime-type.arg}"/>
+		<echo message="compression-min-size.arg   = ${compression-min-size.arg}"/>
+		<echo message="local.server.exists        = ${local.server.exists}"/>
+		<echo message="nwl.dir                    = ${nwl.dir}"/>
+		<echo message="nwl.pickup                 = ${nwl.pickup}"/>
+		<echo message="nwl.webapps                = ${nwl.webapps}"/>
+		<echo message="nwl.work                   = ${nwl.work}"/>
 		<echo message=""/>
 
 	</target>
@@ -476,8 +518,10 @@
 		<echo message="where &lt;goal&gt; is one of the following actions:"/>
 		<echo message=""/>
 		<echo message="deploy        ->  Deploy WAR as app to cloud"/>
+		<echo message="deploy-dir    ->  Deploy all WARs from 'source' param path to cloud"/>
 		<echo message="start         ->  Start app instance on cloud"/>
 		<echo message="stop          ->  Stop app instance on cloud"/>
+		<echo message="restart       ->  Restart app instance on Cloud"/>
 		<echo message="undeploy      ->  Undeploy app from cloud"/>
 		<echo message="status        ->  Show status of app on cloud"/>
 		<echo message="apps          ->  Show apps deployed on cloud account"/>
@@ -511,7 +555,19 @@
 				</fileset>
 			</classpath>
 			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
-			<arg line="deploy --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set} --source &quot;${source.unix}&quot;${url.arg}${component.arg}${java-version.arg}${severity.arg}${minimum-processes.arg}${maximum-processes.arg}"/>
+			<arg line="deploy --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set} --source &quot;${source.unix}&quot;${url.arg}${component.arg}${java-version.arg}${severity.arg}${minimum-processes.arg}${maximum-processes.arg}${compression.arg}${compressible-mime-type.arg}${compression-min-size.arg}${vm-arguments.arg}"/>
+		</java>
+	</target>
+
+	<target name="deploy-dir" description="Deploy all WARs from 'source' param path to cloud" depends="init,password">
+		<java dir="${war.dir}/.." classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
+			<arg line="deploy --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set} --source &quot;${source.set}&quot;${url.arg}${component.arg}${java-version.arg}${severity.arg}${minimum-processes.arg}${maximum-processes.arg}${compression.arg}${compressible-mime-type.arg}${compression-min-size.arg}${vm-arguments.arg}"/>
 		</java>
 	</target>
 
@@ -536,6 +592,18 @@
 			</classpath>
 			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
 			<arg line="stop --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set}${component.arg}${synchronous.arg}"/>
+		</java>
+	</target>
+
+	<target name="restart" description="Restart app instance on HANA Cloud" depends="init,password">
+		<java dir="${sdk.dir}/tools" classname="com.sap.jpaas.infrastructure.console.ConsoleClient" fork="true">
+			<classpath>
+				<fileset dir="${sdk.dir}/tools/lib/cmd">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg line="${sdk.args} ${sdk.proxy.set}"/>
+			<arg line="restart --host ${host} --account ${account} --application ${application.set} --user ${user} --password ${password.set}${synchronous.arg}"/>
 		</java>
 	</target>
 
