@@ -1,3 +1,20 @@
+NOTICE OF DEPRECATION
+=====================
+
+> **Note**: As of the availability of the official "SAP HANA Cloud Platform Maven Plugin" for SAP HANA Cloud Platform, the "SAP HANA Cloud Deployment Plugin for Maven" contained in this repository should be considered as __DEPRECATED__.
+
+The official documentation can be found here:
+
+ - [SAP HANA Cloud Platform Maven Plugin documentation](https://help.hana.ondemand.com/mavenSite/index.html)
+
+SAP HANA Cloud Platform is now shipping its SDK and API to [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.sap.cloud%22), which also includes the official Maven plugin. The following two documents provide more information on how to compile against the SAP HANA Cloud Platform API for Java using Maven, and how to use the official Maven plugin in this context:
+
+- [Building Java Web Applications with Maven](http://scn.sap.com/community/developer-center/cloud-platform/blog/2014/05/27/building-java-applications-with-maven)
+- [Working with the "Neo" Maven Plugin](http://scn.sap.com/community/developer-center/cloud-platform/blog/2014/05/27/working-with-the-neo-maven-plugin)
+
+__We strongly encourage the usage of the official Maven plugin instead of the plugin contained in this repository!__
+
+
 SAP HANA Cloud Deployment Plugin for Maven
 ==========================================
 
