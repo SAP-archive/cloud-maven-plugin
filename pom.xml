@@ -47,7 +47,7 @@
       <!-- Need to reference recent ant version and its according launcher (see below) -->
       <groupId>org.apache.ant</groupId>
       <artifactId>ant</artifactId>
-      <version>1.9.3</version>
+      <version>1.10.9</version>
     </dependency>
     <dependency>
       <groupId>org.apache.ant</groupId>
